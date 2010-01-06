@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="vertical"
+    android:layout_width="fill_parent"
+    android:layout_height="fill_parent"
+    android:clickable="true" android:focusableInTouchMode="true" android:layout_marginRight="0px">
+
+
+
+
+
+
+
+<TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:id="@+id/tvInst" android:includeFontPadding="false" android:text="@string/app_name" android:textSize="10pt" android:layout_margin="5px" android:layout_gravity="center_horizontal"></TextView><TextView android:id="@+id/TextView01" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="@string/txt_ip_address" android:layout_gravity="left|center_vertical" android:layout_margin="5px"></TextView>
+<EditText android:layout_height="wrap_content" android:focusable="true" android:enabled="true" android:id="@+id/tbIp" android:layout_marginLeft="19px" android:layout_marginTop="-20px" android:layout_marginRight="19px" android:layout_width="wrap_content" android:width="200px"></EditText>
+<TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="@string/txt_ip_error" android:textColor="#F00" android:visibility="invisible" android:id="@+id/lbError"></TextView>
+<Button android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="@string/txt_connect" android:id="@+id/btnConnect" android:layout_gravity="left" android:layout_marginLeft="220px" android:width="90px" android:layout_marginTop="-66px"></Button>
+
+
+
+
+<TextView android:id="@+id/TextView02" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="@string/txt_prefs_copy" android:layout_margin="5px"></TextView>
+</LinearLayout>

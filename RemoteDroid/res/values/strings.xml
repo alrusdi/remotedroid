@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    
+    
+<string name="txt_ip_address">Get Started:\n\n1. Launch the RemoteDroid desktop application on your computer.\n\n2. Enter your IP address below:\n</string>
+<string name="txt_ip_error">Server not found</string>
+<string name="txt_connect">Connect</string>
+
+
+<string name="app_name">RemoteDroid</string>
+
+
+<string name="txt_help">Help</string>
+<string name="txt_help_dialog_0">To use this program, you will need the companion RemoteDroid desktop application.  If you don\'t already have it, you can download it here:</string>
+
+<string name="txt_close">Close</string>
+<string name="txt_server_url">http://www.remotedroid.net/</string>
+<string name="txt_help_dialog_1">Once you have downloaded, installed and launched the RemoteDroid application on your computer, it will display your IP address.  Enter this IP address on your phone to connect it to your computer.</string>
+<string name="txt_preferences">Preferences</string>
+<string name="txt_save">Save</string>
+<string name="txt_prefs_copy">Tap the menu button for preferences or help.</string>
+</resources>
