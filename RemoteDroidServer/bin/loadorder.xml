@@ -1,0 +1,6 @@
+<loadout>
+	<load>
+		<xml src="config.xml" id="config" />
+		<image src="icon.gif" id="icon" />
+	</load>
+</loadout>
