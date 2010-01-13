@@ -94,7 +94,7 @@ public class RemoteDroid extends Activity {
 
 				// set the listener for clicking on the text
 				text.setOnClickListener(new View.OnClickListener() {
-					@Override
+					
 					public void onClick(View v) {
 						onSavedHost(str); 
 					}
@@ -102,7 +102,7 @@ public class RemoteDroid extends Activity {
 
 				// set the listener for clicking on the delete button
 				b.setOnClickListener(new View.OnClickListener() {     				
-					@Override
+					
 					public void onClick(View v) { 
 						onRemoveSavedHost(str);
 					}

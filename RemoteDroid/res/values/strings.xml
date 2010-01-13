@@ -2,7 +2,7 @@
 <resources>
     
     
-<string name="txt_ip_address">Get Started:\n\n1. Launch the RemoteDroid desktop application on your computer.\n\n2. Enter your IP address below:\n</string>
+<string name="txt_ip_address">Get Started:\n1. Launch the RemoteDroid desktop application on your computer.\n2. Enter your IP address below:\n</string>
 <string name="txt_ip_error">Server not found</string>
 <string name="txt_connect">Connect</string>
 
