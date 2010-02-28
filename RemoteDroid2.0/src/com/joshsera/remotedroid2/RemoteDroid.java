@@ -1,4 +1,4 @@
-package com.joshsera;
+package com.joshsera.remotedroid2;
 
 import java.util.ArrayList;
 import java.util.HashMap;

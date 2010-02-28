@@ -1,4 +1,4 @@
-package com.joshsera;
+package com.joshsera.remotedroid2;
 
 /**
  * Stores 3 vectors representing a coordinate space.

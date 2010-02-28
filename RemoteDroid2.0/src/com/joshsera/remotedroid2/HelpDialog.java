@@ -1,4 +1,4 @@
-package com.joshsera;
+package com.joshsera.remotedroid2;
 
 import android.app.*;
 import android.content.*;
