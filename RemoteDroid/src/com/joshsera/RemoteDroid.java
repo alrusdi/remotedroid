@@ -1,12 +1,26 @@
 package com.joshsera;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
+
 import android.app.Activity;
+import android.content.Intent;
 import android.os.Bundle;
-import android.content.*;
-import android.widget.*;
-import android.util.*;
-import android.view.*;
+import android.util.Log;
+import android.view.Menu;
+import android.view.MenuItem;
+import android.view.View;
+import android.view.ViewGroup;
+import android.widget.Button;
+import android.widget.EditText;
+import android.widget.ImageButton;
+import android.widget.ListView;
+import android.widget.SimpleAdapter;
+import android.widget.TextView;
+import android.widget.Toast;
 
 /*
  * To-do
@@ -16,6 +30,7 @@ import android.view.*;
  */
 
 public class RemoteDroid extends Activity {
+	private static final String TAG = "RemoteDroid";
 	// menu item(s)
 	public static final int MENU_PREFS = 0;
 	public static final int MENU_HELP = 1;
@@ -23,7 +38,6 @@ public class RemoteDroid extends Activity {
 
 	//
 	private EditText tbIp;
-	private TextView tvError;
 	//
 	private HelpDialog dlHelp;
 	private ListView mHostlist;
@@ -49,12 +63,11 @@ public class RemoteDroid extends Activity {
 		// check SharedPreferences for IP
 		Settings.init(this.getApplicationContext());
 
-		mHostlist = (ListView) findViewById(R.id.hostlist);
+		mHostlist = (ListView) findViewById(R.id.lvHosts);
 		populateHostList();
 
 		//
-		this.tbIp = (EditText)this.findViewById(R.id.tbIp);
-		this.tvError = (TextView)this.findViewById(R.id.lbError);
+		this.tbIp = (EditText)this.findViewById(R.id.etIp);
 		if (Settings.getIp() != null) {
 			this.tbIp.setText(Settings.getIp());
 		}
@@ -94,7 +107,7 @@ public class RemoteDroid extends Activity {
 
 				// set the listener for clicking on the text
 				text.setOnClickListener(new View.OnClickListener() {
-					
+
 					public void onClick(View v) {
 						onSavedHost(str); 
 					}
@@ -102,7 +115,7 @@ public class RemoteDroid extends Activity {
 
 				// set the listener for clicking on the delete button
 				b.setOnClickListener(new View.OnClickListener() {     				
-					
+
 					public void onClick(View v) { 
 						onRemoveSavedHost(str);
 					}
@@ -173,31 +186,25 @@ public class RemoteDroid extends Activity {
 	//
 
 	private void onConnectButton() {
-		    	String ip = this.tbIp.getText().toString();
-		    	if (ip.matches("^[0-9]{1,4}\\.[0-9]{1,4}\\.[0-9]{1,4}\\.[0-9]{1,4}$")) {
-		    		try {
-		    			Settings.setIp(ip);
-		    			//
-			    		this.tvError.setVisibility(View.INVISIBLE);
-			    		Intent i = new Intent(this, PadActivity.class);
-			    		this.startActivity(i);
-			    		this.finish();
-		    		} catch (Exception ex) {
-		    			//this.tvError.setText("Invalid IP address");
-		        		//this.tvError.setVisibility(View.VISIBLE);
-		        		Toast.makeText(this, "Invalid IP address!", Toast.LENGTH_LONG).show();
-		        		Log.d("pad", ex.toString());
-		    		}
-		    	} else {
-		    		//this.tvError.setText("Invalid IP address");
-		    		//this.tvError.setVisibility(View.VISIBLE);
-		    		Toast.makeText(this, "Invalid IP address!", Toast.LENGTH_LONG).show();
-		    	}
-		    	//
-		    	
-		
-
-
+		String ip = this.tbIp.getText().toString();
+		if (ip.matches("^[0-9]{1,4}\\.[0-9]{1,4}\\.[0-9]{1,4}\\.[0-9]{1,4}$")) {
+			try {
+				Settings.setIp(ip);
+				//
+				Intent i = new Intent(this, PadActivity.class);
+				this.startActivity(i);
+				this.finish();
+			} catch (Exception ex) {
+				//this.tvError.setText("Invalid IP address");
+				//this.tvError.setVisibility(View.VISIBLE);
+				Toast.makeText(this, this.getResources().getText(R.string.toast_invalidIP), Toast.LENGTH_LONG).show();
+				Log.d(TAG, ex.toString());
+			}
+		} else {
+			//this.tvError.setText("Invalid IP address");
+			//this.tvError.setVisibility(View.VISIBLE);
+			Toast.makeText(this, this.getResources().getText(R.string.toast_invalidIP), Toast.LENGTH_LONG).show();
+		}
 	}
 
 
@@ -211,7 +218,7 @@ public class RemoteDroid extends Activity {
 			//((SimpleAdapter)mHostlist.getAdapter()).notifyDataSetChanged();
 
 		} catch (Exception e) {
-			Log.d("remotedroid","couldnt remove "+str.toString()+" from list: "+e.toString());
+			Log.d(TAG,"couldnt remove "+str.toString()+" from list: "+e.toString());
 		}
 
 	}
@@ -220,7 +227,7 @@ public class RemoteDroid extends Activity {
 		try {
 			tbIp.setText(s);
 		} catch (Exception e) {
-			Log.d("remotedroid",e.toString());
+			Log.d(TAG,e.toString());
 		}
 
 	}
@@ -235,6 +242,3 @@ public class RemoteDroid extends Activity {
 	}
 
 }
-
-
-
