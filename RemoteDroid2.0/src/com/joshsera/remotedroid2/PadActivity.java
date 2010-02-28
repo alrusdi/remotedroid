@@ -37,11 +37,14 @@ import com.illposed.osc.OSCPortOut;
 /**
  * 
  * @author jsera
- *
- * to-do: trackbutton + mouse click toggles the mouse button to enable click and drag
- * add scroll wheel
- * add port selection text box on front page
- * add back button. Make it go back to the IP connect page
+ * 
+ *         <pre>
+ *         TODO:
+ *         trackbutton + mouse click toggles the mouse button to enable click and drag
+ *         add scroll wheel
+ *         add port selection text box on front page
+ *         add back button. Make it go back to the IP connect page
+ * </pre>
  */
 
 public class PadActivity extends Activity {
@@ -52,7 +55,7 @@ public class PadActivity extends Activity {
 	private static final int TAP_DOUBLE = 3;
 	private static final int TAP_DOUBLE_FINISH = 4;
 	private static final String TAG = "RemoteDroid";
-	
+
 	//
 	private OSCPortOut sender;
 	//
@@ -122,13 +125,13 @@ public class PadActivity extends Activity {
 	// multitouch scroll
 	private float scrollX = 0f;
 	private float scrollY = 0f;
-	
+
 	static final float SCROLL_STEP = 10f;
-	
+
 	public PadActivity() {
 		super();
 	}
-	
+
 	private void enableSensors() {
 		if (mSensorManager == null) {
 			mSensorManager = (SensorManager) this.getSystemService(SENSOR_SERVICE);
@@ -143,29 +146,34 @@ public class PadActivity extends Activity {
 			mSensorMagnetic = mSensorManager.getDefaultSensor(Sensor.TYPE_MAGNETIC_FIELD);
 			Log.d(TAG, "Magnetic Sensor: " + mSensorMagnetic);
 		}
-		
-		this.mSensorManager.registerListener(this.mSensorListener, mSensorAccelerometer, SensorManager.SENSOR_DELAY_GAME);
-		this.mSensorManager.registerListener(this.mSensorListener, mSensorMagnetic, SensorManager.SENSOR_DELAY_GAME);
+
+		this.mSensorManager.registerListener(this.mSensorListener, mSensorAccelerometer,
+				SensorManager.SENSOR_DELAY_GAME);
+		this.mSensorManager.registerListener(this.mSensorListener, mSensorMagnetic,
+				SensorManager.SENSOR_DELAY_GAME);
 	}
-	
+
 	private void disableSensors() {
 		if (mSensorManager != null) {
 			this.mSensorManager.unregisterListener(this.mSensorListener);
 			this.mSensorManager = null;
 		}
 	}
-	
+
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		Settings.init(this.getApplicationContext());
-		//Hide the title bar
+		// Hide the title bar
 		requestWindowFeature(Window.FEATURE_NO_TITLE);
-		getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN, WindowManager.LayoutParams.FLAG_FULLSCREEN); 
+		getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN,
+				WindowManager.LayoutParams.FLAG_FULLSCREEN);
 		if (this.lock == null) {
 			Context appContext = this.getApplicationContext();
 			// get wake lock
-			PowerManager manager = (PowerManager)appContext.getSystemService(Context.POWER_SERVICE);
-			this.lock = manager.newWakeLock(PowerManager.SCREEN_BRIGHT_WAKE_LOCK, this.getString(R.string.app_name));
+			PowerManager manager = (PowerManager) appContext
+					.getSystemService(Context.POWER_SERVICE);
+			this.lock = manager.newWakeLock(PowerManager.SCREEN_BRIGHT_WAKE_LOCK, this
+					.getString(R.string.app_name));
 			// prepare sensor Listener
 			this.mSensorListener = new SensorEventListener() {
 				@Override
@@ -179,17 +187,17 @@ public class PadActivity extends Activity {
 					case Sensor.TYPE_MAGNETIC_FIELD:
 						onMagnetic(event.values);
 						break;
-//					case Sensor.TYPE_ORIENTATION:
-//						break;
+					// case Sensor.TYPE_ORIENTATION:
+					// break;
 					}
 				}
-				
+
 				@Override
 				public void onAccuracyChanged(Sensor sensor, int accuracy) {
 					// no use for this
 				}
 			};
-			
+
 			if (useOrientation) {
 				// enable Sensors
 				enableSensors();
@@ -232,7 +240,8 @@ public class PadActivity extends Activity {
 				}
 			};
 			// window manager stuff
-			this.getWindow().setFlags(WindowManager.LayoutParams.SOFT_INPUT_ADJUST_PAN, WindowManager.LayoutParams.SOFT_INPUT_ADJUST_PAN);
+			this.getWindow().setFlags(WindowManager.LayoutParams.SOFT_INPUT_ADJUST_PAN,
+					WindowManager.LayoutParams.SOFT_INPUT_ADJUST_PAN);
 		}
 		//
 		try {
@@ -243,7 +252,8 @@ public class PadActivity extends Activity {
 			int width = dm.widthPixels;
 			int height = dm.heightPixels;
 			//
-			this.sender = new OSCPortOut(InetAddress.getByName(Settings.getIp()), OSCPort.defaultSCOSCPort());
+			this.sender = new OSCPortOut(InetAddress.getByName(Settings.getIp()), OSCPort
+					.defaultSCOSCPort());
 			//
 			this.black = new Paint();
 			this.black.setARGB(255, 0, 0, 0);
@@ -252,8 +262,8 @@ public class PadActivity extends Activity {
 			this.greenStroke = new Paint();
 			this.greenStroke.setARGB(255, 0, 255, 0);
 			this.greenStroke.setStyle(Paint.Style.STROKE);
-			this.buttonWidth = (int)(((double)width) * 0.5d) - 30;
-			this.buttonHeight = height/3;
+			this.buttonWidth = (int) (((double) width) * 0.5d) - 30;
+			this.buttonHeight = height / 3;
 			initTouchpad(width, height);
 			this.initLeftButton(width, height);
 			this.initRightButton(width, height);
@@ -264,9 +274,9 @@ public class PadActivity extends Activity {
 	}
 
 	private void initTouchpad(int width, int height) {
-		int squWidth = width-2;
-		int squHeight = height/3 * 2;
-		ImageView iv = (ImageView)this.findViewById(R.id.ivRect);
+		int squWidth = width - 2;
+		int squHeight = height / 3 * 2;
+		ImageView iv = (ImageView) this.findViewById(R.id.ivRect);
 		Canvas ca = new Canvas();
 		Paint red = new Paint();
 		red.setStyle(Paint.Style.STROKE);
@@ -283,13 +293,13 @@ public class PadActivity extends Activity {
 			}
 		});
 	}
-	
+
 	private void initLeftButton(int width, int height) {
-		ImageView iv = (ImageView)this.findViewById(R.id.ivBtnLeft);
+		ImageView iv = (ImageView) this.findViewById(R.id.ivBtnLeft);
 		Canvas ca = new Canvas();
 		Bitmap bm = Bitmap.createBitmap(this.buttonWidth, this.buttonHeight, Bitmap.Config.RGB_565);
 		ca.setBitmap(bm);
-		this.drawSquare(ca, this.buttonWidth-2, this.buttonHeight-2, this.greenStroke);
+		this.drawSquare(ca, this.buttonWidth - 2, this.buttonHeight - 2, this.greenStroke);
 		iv.setImageBitmap(bm);
 		// listener
 		iv.setOnTouchListener(new View.OnTouchListener() {
@@ -298,20 +308,20 @@ public class PadActivity extends Activity {
 			}
 		});
 		// position the button
-		AbsoluteLayout.LayoutParams params = (AbsoluteLayout.LayoutParams)iv.getLayoutParams();
+		AbsoluteLayout.LayoutParams params = (AbsoluteLayout.LayoutParams) iv.getLayoutParams();
 		params.y = this.buttonHeight * 2;
 		// reference some stuff
 		this.ivLeftButton = iv;
 		this.caLeftButton = ca;
 		this.bmLeftButton = bm;
 	}
-	
+
 	private void initRightButton(int width, int height) {
-		ImageView iv = (ImageView)this.findViewById(R.id.ivBtnRight);
+		ImageView iv = (ImageView) this.findViewById(R.id.ivBtnRight);
 		Canvas ca = new Canvas();
 		Bitmap bm = Bitmap.createBitmap(this.buttonWidth, this.buttonHeight, Bitmap.Config.RGB_565);
 		ca.setBitmap(bm);
-		this.drawSquare(ca, this.buttonWidth-2, this.buttonHeight-2, this.greenStroke);
+		this.drawSquare(ca, this.buttonWidth - 2, this.buttonHeight - 2, this.greenStroke);
 		iv.setImageBitmap(bm);
 		// listener
 		iv.setOnTouchListener(new View.OnTouchListener() {
@@ -320,7 +330,7 @@ public class PadActivity extends Activity {
 			}
 		});
 		// position the button
-		AbsoluteLayout.LayoutParams params = (AbsoluteLayout.LayoutParams)iv.getLayoutParams();
+		AbsoluteLayout.LayoutParams params = (AbsoluteLayout.LayoutParams) iv.getLayoutParams();
 		params.y = this.buttonHeight * 2;
 		params.x = this.buttonWidth + 60;
 		//
@@ -328,14 +338,14 @@ public class PadActivity extends Activity {
 		this.caRightButton = ca;
 		this.bmRightButton = bm;
 	}
-	
+
 	private void initMidButton(int width, int height) {
-		ImageView iv = (ImageView)this.findViewById(R.id.ivBtnSoft);
+		ImageView iv = (ImageView) this.findViewById(R.id.ivBtnSoft);
 		Canvas ca = new Canvas();
 		Bitmap bm = Bitmap.createBitmap(60, this.buttonHeight, Bitmap.Config.RGB_565);
 		ca.setBitmap(bm);
 		Bitmap bg = BitmapFactory.decodeResource(this.getResources(), R.drawable.softkeyoff);
-		ca.drawBitmap(bg, 10, ((float)this.buttonHeight)/2 - 20, null);
+		ca.drawBitmap(bg, 10, ((float) this.buttonHeight) / 2 - 20, null);
 		iv.setImageBitmap(bm);
 		// listener
 		iv.setOnTouchListener(new View.OnTouchListener() {
@@ -344,7 +354,7 @@ public class PadActivity extends Activity {
 			}
 		});
 		// position
-		AbsoluteLayout.LayoutParams params = (AbsoluteLayout.LayoutParams)iv.getLayoutParams();
+		AbsoluteLayout.LayoutParams params = (AbsoluteLayout.LayoutParams) iv.getLayoutParams();
 		params.y = this.buttonHeight * 2;
 		params.x = this.buttonWidth;
 		//
@@ -354,11 +364,11 @@ public class PadActivity extends Activity {
 		this.bmSoftOff = bg;
 		this.bmSoftOn = BitmapFactory.decodeResource(this.getResources(), R.drawable.softkeyon);
 	}
-	
+
 	public void onStart() {
 		super.onStart();
 	}
-	
+
 	public void onResume() {
 		super.onResume();
 		// acquire screen lock
@@ -368,7 +378,7 @@ public class PadActivity extends Activity {
 			enableSensors();
 		}
 	}
-	
+
 	public void onPause() {
 		super.onPause();
 		// this'd be a great time to disconnect from the server, and clean
@@ -378,18 +388,18 @@ public class PadActivity extends Activity {
 		// release sensor
 		disableSensors();
 	}
-	
+
 	public void onStop() {
 		super.onStop();
 	}
-	
+
 	public void onDestroy() {
 		super.onDestroy();
 		this.sender.close();
 	}
-	
+
 	// keyboard
-	
+
 	public boolean onKeyDown(int keycode, KeyEvent ev) {
 		if (keycode == KeyEvent.KEYCODE_MENU) {
 			return false;
@@ -398,11 +408,12 @@ public class PadActivity extends Activity {
 			return false;
 		}
 		//
-//		Log.d(TAG, "keydown "+String.valueOf(keycode));
+		// Log.d(TAG, "keydown "+String.valueOf(keycode));
 		Object[] args = new Object[3];
 		args[0] = 0; /* key down */
 		args[1] = keycode;
-		args[2] = new Character(Character.toChars(Settings.charmap.get(keycode, ev.getMetaState()))[0]).toString();
+		args[2] = new Character(
+				Character.toChars(Settings.charmap.get(keycode, ev.getMetaState()))[0]).toString();
 		OSCMessage msg = new OSCMessage("/keyboard", args);
 		try {
 			this.sender.send(msg);
@@ -412,7 +423,7 @@ public class PadActivity extends Activity {
 		//
 		return true;
 	}
-	
+
 	public boolean onKeyUp(int keycode, KeyEvent ev) {
 		if (keycode == KeyEvent.KEYCODE_MENU) {
 			// menu key
@@ -430,11 +441,12 @@ public class PadActivity extends Activity {
 			return false;
 		}
 		//
-//		Log.d(TAG, "keyup "+String.valueOf(keycode));
+		// Log.d(TAG, "keyup "+String.valueOf(keycode));
 		Object[] args = new Object[3];
 		args[0] = 1; /* key up */
 		args[1] = keycode;
-		args[2] = new Character(Character.toChars(Settings.charmap.get(keycode, ev.getMetaState()))[0]).toString();
+		args[2] = new Character(
+				Character.toChars(Settings.charmap.get(keycode, ev.getMetaState()))[0]).toString();
 		OSCMessage msg = new OSCMessage("/keyboard", args);
 		try {
 			this.sender.send(msg);
@@ -444,9 +456,9 @@ public class PadActivity extends Activity {
 		//
 		return true;
 	}
-	
+
 	// trackball
-	
+
 	public boolean onTrackballEvent(MotionEvent ev) {
 		//
 		if (ev.getAction() == MotionEvent.ACTION_UP) {
@@ -456,157 +468,167 @@ public class PadActivity extends Activity {
 		if (Settings.getTrackAsScroll() == false) {
 			// use as mouse
 			float dir = ev.getRawX();
-			dir = dir == 0 ? 1 : dir/Math.abs(dir);
-			float xDir = (float)Math.pow(ev.getRawX()/0.1666667, 3);
+			dir = dir == 0 ? 1 : dir / Math.abs(dir);
+			float xDir = (float) Math.pow(ev.getRawX() / 0.1666667, 3);
 			//
 			dir = ev.getRawY();
-			dir = dir == 0 ? 1 : dir/Math.abs(dir);
-			float yDir = (float)Math.pow(ev.getRawY()/0.1666667, 3);
+			dir = dir == 0 ? 1 : dir / Math.abs(dir);
+			float yDir = (float) Math.pow(ev.getRawY() / 0.1666667, 3);
 			this.sendMouseEvent(2, xDir, yDir);
 			//
 		} else {
 			// use as scroll
 			float dir = ev.getRawY();
 			if (dir != 0) {
-				dir = -(dir/Math.abs(dir));
-				this.sendScrollEvent((int)dir);
+				dir = -(dir / Math.abs(dir));
+				this.sendScrollEvent((int) dir);
 			}
 		}
 		//
 		return true;
 	}
-	
+
 	// mouse events
-	
+
 	private boolean onMouseMove(MotionEvent ev) {
 		int type = 0;
 		float xMove = 0f;
 		float yMove = 0f;
-		
+
 		int pointerCount = ev.getPointerCount();
-		
-//		for (int i = 0; i < pointerCount; i++) {
-//			int pointerId = ev.getPointerId(i);
-//			
-//			Log.v("Nicolas", "[Id=" + i + " - Index=" + i + "] X=" + ev.getX(pointerId) + " Y="
-//					+ ev.getY(pointerId) + " Pressure="
-//					+ ev.getPressure(pointerId));
-//		}
-		
+
+		// for (int i = 0; i < pointerCount; i++) {
+		// int pointerId = ev.getPointerId(i);
+		//			
+		// Log.v("Nicolas", "[Id=" + i + " - Index=" + i + "] X=" +
+		// ev.getX(pointerId) + " Y="
+		// + ev.getY(pointerId) + " Pressure="
+		// + ev.getPressure(pointerId));
+		// }
+
 		switch (ev.getAction()) {
-			case MotionEvent.ACTION_DOWN:
-				//
-				if (Settings.getTapToClick() && (pointerCount==1)) {
-					if (this.tapState == TAP_NONE) {
-						// first tap
+		case MotionEvent.ACTION_DOWN:
+			//
+			if (Settings.getTapToClick() && (pointerCount == 1)) {
+				if (this.tapState == TAP_NONE) {
+					// first tap
+					this.lastTap = System.currentTimeMillis();
+					//
+				} else if (this.tapState == TAP_FIRST) {
+					// second tap - check if we've fired the button up
+					if (this.tapTimer != null) {
+						// up has not been fired
+						this.tapTimer.cancel();
+						this.tapTimer = null;
+						this.tapState = TAP_SECOND;
 						this.lastTap = System.currentTimeMillis();
-						//
-					} else if (this.tapState == TAP_FIRST) {
-						// second tap - check if we've fired the button up
-						if (this.tapTimer != null) {
-							// up has not been fired
-							this.tapTimer.cancel();
-							this.tapTimer = null;
-							this.tapState = TAP_SECOND;
-							this.lastTap = System.currentTimeMillis();
-						}
 					}
 				}
-				//
-				type = 0;
-				xMove = 0;
-				yMove = 0;
-				//
+			}
+			//
+			type = 0;
+			xMove = 0;
+			yMove = 0;
+			//
+			this.xHistory = ev.getX();
+			this.yHistory = ev.getY();
+			//
+			break;
+		case MotionEvent.ACTION_UP:
+			if (Settings.getTapToClick() && (pointerCount == 1)) {
+				// it's a tap!
+				long now = System.currentTimeMillis();
+				long elapsed = now - this.lastTap;
+				if (elapsed <= Settings.getClickTime()) {
+					if (this.tapState == TAP_NONE) {
+						// send the mouse down event
+						this.lastTap = now;
+						//
+						this.tapTimer = new Timer();
+						this.tapTimer.scheduleAtFixedRate(new TimerTask() {
+							public void run() {
+								firstTapUp();
+							}
+						}, 0, Settings.getClickTime());
+
+					} else if (this.tapState == TAP_SECOND) {
+						// double-click
+						this.tapTimer = new Timer();
+						this.tapTimer.scheduleAtFixedRate(new TimerTask() {
+							public void run() {
+								secondTapUp();
+							}
+						}, 0, 10);
+					}
+
+				} else {
+					// too long
+					this.lastTap = 0;
+					if (this.tapState == TAP_SECOND) {
+						// release the button
+						this.tapState = TAP_NONE;
+						this.lastTap = 0;
+						this.leftButtonUp();
+					}
+				}
+			}
+			//
+			type = 1;
+			xMove = 0;
+			yMove = 0;
+			break;
+		case MotionEvent.ACTION_MOVE:
+			if (pointerCount == 1) {
+				// move
+				type = 2;
+				if (lastPointerCount == 1) {
+					xMove = ev.getX() - this.xHistory;
+					yMove = ev.getY() - this.yHistory;
+				}
 				this.xHistory = ev.getX();
 				this.yHistory = ev.getY();
-				//
-				break;
-			case MotionEvent.ACTION_UP:
-				if (Settings.getTapToClick() && (pointerCount==1)) {
-					// it's a tap!
-					long now = System.currentTimeMillis();
-					long elapsed = now - this.lastTap;
-					if (elapsed <= Settings.getClickTime()) {
-						if (this.tapState == TAP_NONE) {
-							// send the mouse down event
-							this.lastTap = now;
-							//
-							this.tapTimer = new Timer();
-							this.tapTimer.scheduleAtFixedRate(new TimerTask() {
-								public void run() {
-									firstTapUp();
-								}
-							}, 0, Settings.getClickTime());
-							
-						} else if (this.tapState == TAP_SECOND) {
-							// double-click
-							this.tapTimer = new Timer();
-							this.tapTimer.scheduleAtFixedRate(new TimerTask() {
-								public void run() {
-									secondTapUp();
-								}
-							}, 0, 10);
-						}
-						
-					} else {
-						// too long
-						this.lastTap = 0;
-						if (this.tapState == TAP_SECOND) {
-							// release the button
-							this.tapState = TAP_NONE;
-							this.lastTap = 0;
-							this.leftButtonUp();
-						}
-					}
-				}
-				//
-				type = 1;
-				xMove = 0;
-				yMove = 0;
-				break;
-			case MotionEvent.ACTION_MOVE:
-				if (pointerCount == 1) {
-					// move
-					type = 2;
-					if (lastPointerCount == 1) {
-						xMove = ev.getX() - this.xHistory;
-						yMove = ev.getY() - this.yHistory;
-					}
-					this.xHistory = ev.getX();
-					this.yHistory = ev.getY();
-					break;
-				} else if (pointerCount == 2){
-					// multitouch scroll
-					// TODO this is ugly, I should improve this (Nicolas)
-					type = -1;
-					int pointer0 = ev.getPointerId(0);
-					int pointer1 = ev.getPointerId(1);
-					float posX = ev.getX(pointer0);
-					float posY = ev.getY(pointer0);
+			} else if (pointerCount == 2) {
+				// multitouch scroll
+				type = -1;
 
-					if (lastPointerCount == 2) {
-						posX += ev.getX(pointer1);
-						posX /= 2;
-						posY += ev.getY(pointer1);
-						posY /= 2;
-					}
-					
+				int pointer0 = ev.getPointerId(0);
+				int pointer1 = ev.getPointerId(1);
+
+				float posX = ev.getX(pointer0);
+				float posY = ev.getY(pointer0);
+
+				// only consider the second pointer if I had a previous history
+				if (lastPointerCount == 2) {
+					posX += ev.getX(pointer1);
+					posX /= 2;
+					posY += ev.getY(pointer1);
+					posY /= 2;
+
 					xMove = posX - this.xHistory;
 					yMove = posY - this.yHistory;
-					
-					this.xHistory = posX;
-					this.yHistory = posY;
-					break;
+				} else {
+					xMove = posX - this.xHistory;
+					yMove = posY - this.yHistory;
+
+					posX += ev.getX(pointer1);
+					posX /= 2;
+					posY += ev.getY(pointer1);
+					posY /= 2;
 				}
+
+				this.xHistory = posX;
+				this.yHistory = posY;
+			}
+			break;
 		}
 		if (type == -1) {
-			scrollX += xMove;
+			// scrollX += xMove;
 			scrollY += yMove;
 			int dir = 0;
-			if (Math.abs(scrollX) > SCROLL_STEP) {
-				// can't deal with X scrolling yet
-				scrollX = 0f;
-			}
+			// if (Math.abs(scrollX) > SCROLL_STEP) {
+			// // can't deal with X scrolling yet
+			// scrollX = 0f;
+			// }
 			if (Math.abs(scrollY) > SCROLL_STEP) {
 				if (scrollY > 0f) {
 					dir = -1;
@@ -616,15 +638,17 @@ public class PadActivity extends Activity {
 				scrollY = 0f;
 			}
 			this.sendScrollEvent(dir);
-		} else {
+		} else if (type == 2) {
+			// if type is 0 or 1, the server will not do anything with it, so we
+			// only send type 2 events
 			this.sendMouseEvent(type, xMove, yMove);
 		}
 		lastPointerCount = pointerCount;
 		return true;
 	}
-	
+
 	//
-	
+
 	private void firstTapUp() {
 		this.leftToggle = false;
 		if (this.tapState == TAP_NONE) {
@@ -640,7 +664,7 @@ public class PadActivity extends Activity {
 			this.tapTimer = null;
 		}
 	}
-	
+
 	private void secondTapUp() {
 		this.leftToggle = false;
 		if (this.tapState == TAP_SECOND) {
@@ -658,9 +682,9 @@ public class PadActivity extends Activity {
 			this.tapTimer = null;
 		}
 	}
-	
+
 	// orientation event
-	
+
 	private void onAccelerometer(float[] values) {
 		Point3D.copy(values, this.accel);
 		this.accelSet = true;
@@ -668,7 +692,7 @@ public class PadActivity extends Activity {
 			this.moveMouseFromSensors();
 		}
 	}
-	
+
 	private void onMagnetic(float[] values) {
 		Point3D.copy(values, this.mag);
 		this.magSet = true;
@@ -676,7 +700,7 @@ public class PadActivity extends Activity {
 			this.moveMouseFromSensors();
 		}
 	}
-	
+
 	private void moveMouseFromSensors() {
 		this.accelSet = false;
 		this.magSet = false;
@@ -685,26 +709,28 @@ public class PadActivity extends Activity {
 		// get some dot products
 		double dotX = Point3D.dot(this.currSpace.y, this.lastSpace.x);
 		double dotY = Point3D.dot(this.currSpace.y, this.lastSpace.y);
-		double angleX = Math.acos(dotX)/Math.PI - 0.5;
-		double angleY = Math.acos(dotY)/Math.PI;
-		Log.d(TAG, String.valueOf(angleX * 400)+", "+String.valueOf(angleY * 400));
+		double angleX = Math.acos(dotX) / Math.PI - 0.5;
+		double angleY = Math.acos(dotY) / Math.PI;
+		Log.d(TAG, String.valueOf(angleX * 400) + ", " + String.valueOf(angleY * 400));
 		//
-		this.sendMouseEvent(2, (float)(angleX * 400), (float)(0 * 400));
+		this.sendMouseEvent(2, (float) (angleX * 400), (float) (0 * 400));
 		this.lastSpace.copy(this.currSpace);
 	}
-	
+
 	// abstract mouse event
-	
+
 	private void sendMouseEvent(int type, float x, float y) {
 		//
-		float xDir =  x == 0 ? 1 : x/Math.abs(x);
-		float yDir =  y == 0 ? 1 : y/Math.abs(y);
+		float xDir = x == 0 ? 1 : x / Math.abs(x);
+		float yDir = y == 0 ? 1 : y / Math.abs(y);
 		//
 		Object[] args = new Object[3];
 		args[0] = type;
-		args[1] = (float)(Math.pow(Math.abs(x), 1+((double)Settings.getSensitivity())/100d)) * xDir;
-		args[2] = (float)(Math.pow(Math.abs(y), 1+((double)Settings.getSensitivity())/100d)) * yDir;
-//		Log.d(TAG, String.valueOf(Settings.getSensitivity()));
+		args[1] = (float) (Math.pow(Math.abs(x), 1 + ((double) Settings.getSensitivity()) / 100d))
+				* xDir;
+		args[2] = (float) (Math.pow(Math.abs(y), 1 + ((double) Settings.getSensitivity()) / 100d))
+				* yDir;
+		// Log.d(TAG, String.valueOf(Settings.getSensitivity()));
 		//
 		OSCMessage msg = new OSCMessage("/mouse", args);
 		try {
@@ -713,7 +739,7 @@ public class PadActivity extends Activity {
 			Log.d(TAG, ex.toString());
 		}
 	}
-	
+
 	private void sendScrollEvent(int dir) {
 		Object[] args = new Object[1];
 		args[0] = dir;
@@ -725,54 +751,60 @@ public class PadActivity extends Activity {
 			Log.d(TAG, ex.toString());
 		}
 	}
-	
+
 	private boolean onLeftTouch(MotionEvent ev) {
 		switch (ev.getAction()) {
-			case MotionEvent.ACTION_DOWN:
-				//
-				if (this.toggleButton == false) {
-					if (this.leftToggle) {
-						this.leftButtonUp();
-						this.leftToggle = false;
-					}
-					this.leftButtonDown();
+		case MotionEvent.ACTION_DOWN:
+			//
+			if (this.toggleButton == false) {
+				if (this.leftToggle) {
+					this.leftButtonUp();
+					this.leftToggle = false;
 				}
-				break;
-			case MotionEvent.ACTION_UP:
-				//
-				if (this.toggleButton == false) {
+				this.leftButtonDown();
+			}
+			break;
+		case MotionEvent.ACTION_UP:
+			//
+			if (this.toggleButton == false) {
+				this.leftButtonUp();
+			} else {
+				if (this.leftToggle) {
 					this.leftButtonUp();
 				} else {
-					if (this.leftToggle) {
-						this.leftButtonUp();
-					} else {
-						this.leftButtonDown();
-					}
-					this.leftToggle = !this.leftToggle;
+					this.leftButtonDown();
 				}
-				break;
-			case MotionEvent.ACTION_MOVE:
-				moveMouseWithSecondFinger(ev);
-				break;
+				this.leftToggle = !this.leftToggle;
+			}
+			break;
+		case MotionEvent.ACTION_MOVE:
+			moveMouseWithSecondFinger(ev);
+			break;
 		}
 		//
 		return true;
 	}
-	
+
+	/**
+	 * Used to move the mouse with the second finger when one of the mouse
+	 * buttons are pressed on the UI.
+	 * 
+	 * @param ev
+	 */
 	private void moveMouseWithSecondFinger(MotionEvent ev) {
 		int pointerCount = ev.getPointerCount();
 		// if it is a multitouch move event
 		if (pointerCount == 2) {
-//			int pointer0 = ev.getPointerId(0);
+			// int pointer0 = ev.getPointerId(0);
 			int pointer1 = ev.getPointerId(1);
-			
+
 			float x = ev.getX(pointer1);
 			float y = ev.getY(pointer1);
-			
+
 			if (lastPointerCount == 2) {
 				float xMove = x - this.xHistory;
 				float yMove = y - this.yHistory;
-				
+
 				this.sendMouseEvent(2, xMove, yMove);
 			}
 			this.xHistory = x;
@@ -793,7 +825,7 @@ public class PadActivity extends Activity {
 		// graphical feedback
 		this.handler.post(this.rLeftDown);
 	}
-	
+
 	private synchronized void leftButtonUp() {
 		Object[] args = new Object[1];
 		args[0] = 1;
@@ -806,42 +838,42 @@ public class PadActivity extends Activity {
 		// graphical feedback
 		this.handler.post(this.rLeftUp);
 	}
-	
+
 	private boolean onRightTouch(MotionEvent ev) {
 		switch (ev.getAction()) {
-			case MotionEvent.ACTION_DOWN:
-				//
-				if (this.toggleButton == false) {
-					if (this.rightToggle) {
-						this.rightButtonUp();
-						this.rightToggle = false;
-					}
+		case MotionEvent.ACTION_DOWN:
+			//
+			if (this.toggleButton == false) {
+				if (this.rightToggle) {
+					this.rightButtonUp();
 					this.rightToggle = false;
-					this.rightButtonDown();
 				}
-				break;
-			case MotionEvent.ACTION_UP:
-				//
-				if (this.toggleButton == false) {
+				this.rightToggle = false;
+				this.rightButtonDown();
+			}
+			break;
+		case MotionEvent.ACTION_UP:
+			//
+			if (this.toggleButton == false) {
+				this.rightButtonUp();
+			} else {
+				// toggle magic!
+				if (this.rightToggle) {
 					this.rightButtonUp();
 				} else {
-					// toggle magic!
-					if (this.rightToggle) {
-						this.rightButtonUp();
-					} else {
-						this.rightButtonDown();
-					}
-					this.rightToggle = !this.rightToggle;
+					this.rightButtonDown();
 				}
-				break;
-			case MotionEvent.ACTION_MOVE:
-				moveMouseWithSecondFinger(ev);
-				break;
+				this.rightToggle = !this.rightToggle;
+			}
+			break;
+		case MotionEvent.ACTION_MOVE:
+			moveMouseWithSecondFinger(ev);
+			break;
 		}
 		//
 		return true;
 	}
-	
+
 	private void rightButtonDown() {
 		Object[] args = new Object[1];
 		args[0] = 0;
@@ -854,7 +886,7 @@ public class PadActivity extends Activity {
 		// graphical feedback
 		this.handler.post(this.rRightDown);
 	}
-	
+
 	private void rightButtonUp() {
 		Object[] args = new Object[1];
 		args[0] = 1;
@@ -867,7 +899,7 @@ public class PadActivity extends Activity {
 		// graphical feedback
 		this.handler.post(this.rRightUp);
 	}
-	
+
 	private boolean onMidTouch(MotionEvent ev) {
 		switch (ev.getAction()) {
 		case MotionEvent.ACTION_DOWN:
@@ -884,57 +916,59 @@ public class PadActivity extends Activity {
 		//
 		return true;
 	}
-	
+
 	private void midButtonDown() {
-		InputMethodManager man = (InputMethodManager)this.getApplicationContext().getSystemService(INPUT_METHOD_SERVICE);
-		//boolean result = man.showSoftInput(this.findViewById(R.id.ivBtnSoft), InputMethodManager.SHOW_IMPLICIT, new SoftResultReceiver(this.handler));
-		man.toggleSoftInputFromWindow ( this.ivMidButton.getWindowToken (),
-				InputMethodManager.SHOW_FORCED,
-				InputMethodManager.HIDE_IMPLICIT_ONLY ); 
-		//Log.d(TAG, "show keyboard result: "+String.valueOf(result));
+		InputMethodManager man = (InputMethodManager) this.getApplicationContext()
+				.getSystemService(INPUT_METHOD_SERVICE);
+		// boolean result = man.showSoftInput(this.findViewById(R.id.ivBtnSoft),
+		// InputMethodManager.SHOW_IMPLICIT, new
+		// SoftResultReceiver(this.handler));
+		man.toggleSoftInputFromWindow(this.ivMidButton.getWindowToken(),
+				InputMethodManager.SHOW_FORCED, InputMethodManager.HIDE_IMPLICIT_ONLY);
+		// Log.d(TAG, "show keyboard result: "+String.valueOf(result));
 		//
-		
+
 	}
-	
+
 	private void midButtonUp() {
-		InputMethodManager man = (InputMethodManager)this.getApplicationContext().getSystemService(INPUT_METHOD_SERVICE);
+		InputMethodManager man = (InputMethodManager) this.getApplicationContext()
+				.getSystemService(INPUT_METHOD_SERVICE);
 		//
-		man.toggleSoftInputFromWindow ( this.ivMidButton.getWindowToken (),
-				InputMethodManager.SHOW_FORCED,
-				InputMethodManager.HIDE_IMPLICIT_ONLY ); 
-		
+		man.toggleSoftInputFromWindow(this.ivMidButton.getWindowToken(),
+				InputMethodManager.SHOW_FORCED, InputMethodManager.HIDE_IMPLICIT_ONLY);
+
 	}
-	
+
 	// drawing
-	
+
 	private void drawSquare(Canvas ca, int width, int height, Paint color) {
 		//
 		Rect r = new Rect();
 		r.set(0, 0, width, height);
 		ca.drawRect(r, color);
 	}
-	
+
 	private void drawButtonOn(Canvas ca, Bitmap bm, ImageView iv) {
-		this.drawSquare(ca, this.buttonWidth-2, this.buttonHeight-2, this.black);
-		this.drawSquare(ca, this.buttonWidth-2, this.buttonHeight-2, this.greenFill);
+		this.drawSquare(ca, this.buttonWidth - 2, this.buttonHeight - 2, this.black);
+		this.drawSquare(ca, this.buttonWidth - 2, this.buttonHeight - 2, this.greenFill);
 		iv.setImageBitmap(bm);
 	}
-	
+
 	private void drawButtonOff(Canvas ca, Bitmap bm, ImageView iv) {
-		this.drawSquare(ca, this.buttonWidth-2, this.buttonHeight-2, this.black);
-		this.drawSquare(ca, this.buttonWidth-2, this.buttonHeight-2, this.greenStroke);
+		this.drawSquare(ca, this.buttonWidth - 2, this.buttonHeight - 2, this.black);
+		this.drawSquare(ca, this.buttonWidth - 2, this.buttonHeight - 2, this.greenStroke);
 		iv.setImageBitmap(bm);
 	}
-	
+
 	private void drawSoftOn() {
 		this.drawSquare(this.caMidButton, 60, this.buttonHeight, this.greenFill);
-		this.caMidButton.drawBitmap(this.bmSoftOn, 10, ((float)this.buttonHeight)/2 - 20, null);
+		this.caMidButton.drawBitmap(this.bmSoftOn, 10, ((float) this.buttonHeight) / 2 - 20, null);
 		this.ivMidButton.setImageBitmap(this.bmMidButton);
 	}
-	
+
 	private void drawSoftOff() {
 		this.drawSquare(this.caMidButton, 60, this.buttonHeight, this.black);
-		this.caMidButton.drawBitmap(this.bmSoftOff, 10, ((float)this.buttonHeight)/2 - 20, null);
+		this.caMidButton.drawBitmap(this.bmSoftOff, 10, ((float) this.buttonHeight) / 2 - 20, null);
 		this.ivMidButton.setImageBitmap(this.bmMidButton);
 	}
 }
