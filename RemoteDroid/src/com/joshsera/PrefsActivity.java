@@ -1,10 +1,11 @@
 package com.joshsera;
 
-import android.app.*;
-import android.content.*;
-import android.os.*;
-import android.view.*;
-import android.widget.*;
+import android.app.Activity;
+import android.os.Bundle;
+import android.view.View;
+import android.widget.Button;
+import android.widget.CheckBox;
+import android.widget.SeekBar;
 
 public class PrefsActivity extends Activity {
 	//
@@ -50,8 +51,8 @@ public class PrefsActivity extends Activity {
 		Settings.setTrackAsScroll(this.cbWheel.isChecked());
 		Settings.setSensitivity(this.sbSensitivity.getProgress());
 		// go back to home screen
-		Intent i = new Intent(this, RemoteDroid.class);
-		this.startActivity(i);
-		this.finish();
+//		Intent i = new Intent(this, RemoteDroid.class);
+//		this.startActivity(i);
+//		this.finish();
 	}
 }

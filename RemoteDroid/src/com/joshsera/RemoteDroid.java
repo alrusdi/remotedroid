@@ -230,9 +230,8 @@ public class RemoteDroid extends Activity {
 	}
 
 	private void onPrefs() {
-		Intent i = new Intent(this, PrefsActivity.class);
+		Intent i = new Intent(RemoteDroid.this, PrefsActivity.class);
 		this.startActivity(i);
-		this.finish();
 	}
 
 }
