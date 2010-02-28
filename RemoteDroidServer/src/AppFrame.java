@@ -73,7 +73,7 @@ public class AppFrame extends Frame {
 				jar = new JarFile(new File(fileURL.toURI()));
 				
 			} else {
-				basePath = System.getProperty("user.dir");
+				basePath = System.getProperty("user.dir") + "\\res\\";
 			}
 		} catch (Exception ex) {
 			this.textLines[1] = "exception: "+ex.toString();
