@@ -1,9 +1,10 @@
 package com.joshsera;
 
 import java.util.LinkedList;
-import android.content.*;
-import android.util.Log;
-import android.view.*;
+
+import android.content.Context;
+import android.content.SharedPreferences;
+import android.view.KeyCharacterMap;
 
 public class Settings {
 	private static String ip;

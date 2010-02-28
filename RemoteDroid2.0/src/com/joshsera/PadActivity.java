@@ -12,7 +12,9 @@ import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
 import android.graphics.Paint;
 import android.graphics.Rect;
-import android.hardware.SensorListener;
+import android.hardware.Sensor;
+import android.hardware.SensorEvent;
+import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
 import android.os.Bundle;
 import android.os.Handler;
@@ -49,6 +51,7 @@ public class PadActivity extends Activity {
 	private static final int TAP_SECOND = 2;
 	private static final int TAP_DOUBLE = 3;
 	private static final int TAP_DOUBLE_FINISH = 4;
+	private static final String TAG = "RemoteDroid";
 	
 	//
 	private OSCPortOut sender;
@@ -96,9 +99,10 @@ public class PadActivity extends Activity {
 	// power lock
 	private PowerManager.WakeLock lock;
 	// sensors
-	private SensorManager sensormanager;
-	private SensorListener accListener;
-	private SensorListener magListener;
+	private SensorManager mSensorManager;
+	private SensorEventListener mSensorListener;
+	private Sensor mSensorAccelerometer;
+	private Sensor mSensorMagnetic;
 	// sensor tolerance
 	private boolean useOrientation = false;
 	//
@@ -125,6 +129,32 @@ public class PadActivity extends Activity {
 		super();
 	}
 	
+	private void enableSensors() {
+		if (mSensorManager == null) {
+			mSensorManager = (SensorManager) this.getSystemService(SENSOR_SERVICE);
+		}
+
+		if (mSensorAccelerometer == null) {
+			mSensorAccelerometer = mSensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER);
+			Log.d(TAG, "Accelerometer Sensor: " + mSensorAccelerometer);
+		}
+
+		if (mSensorMagnetic == null) {
+			mSensorMagnetic = mSensorManager.getDefaultSensor(Sensor.TYPE_MAGNETIC_FIELD);
+			Log.d(TAG, "Magnetic Sensor: " + mSensorMagnetic);
+		}
+		
+		this.mSensorManager.registerListener(this.mSensorListener, mSensorAccelerometer, SensorManager.SENSOR_DELAY_GAME);
+		this.mSensorManager.registerListener(this.mSensorListener, mSensorMagnetic, SensorManager.SENSOR_DELAY_GAME);
+	}
+	
+	private void disableSensors() {
+		if (mSensorManager != null) {
+			this.mSensorManager.unregisterListener(this.mSensorListener);
+			this.mSensorManager = null;
+		}
+	}
+	
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		Settings.init(this.getApplicationContext());
@@ -136,26 +166,35 @@ public class PadActivity extends Activity {
 			// get wake lock
 			PowerManager manager = (PowerManager)appContext.getSystemService(Context.POWER_SERVICE);
 			this.lock = manager.newWakeLock(PowerManager.SCREEN_BRIGHT_WAKE_LOCK, this.getString(R.string.app_name));
-			// get sensor listener
-			this.sensormanager = (SensorManager)appContext.getSystemService(Context.SENSOR_SERVICE);
-			this.accListener = new SensorListener() {
-				public void onAccuracyChanged(int sensor, int changed) {
-					
+			// prepare sensor Listener
+			this.mSensorListener = new SensorEventListener() {
+				@Override
+				public void onSensorChanged(SensorEvent event) {
+					Sensor sensor = event.sensor;
+					int type = sensor.getType();
+					switch (type) {
+					case Sensor.TYPE_ACCELEROMETER:
+						onAccelerometer(event.values);
+						break;
+					case Sensor.TYPE_MAGNETIC_FIELD:
+						onMagnetic(event.values);
+						break;
+//					case Sensor.TYPE_ORIENTATION:
+//						break;
+					}
 				}
 				
-				public void onSensorChanged(int sensor, float[] values) {
-					onAccelerometer(values);
+				@Override
+				public void onAccuracyChanged(Sensor sensor, int accuracy) {
+					// no use for this
 				}
 			};
-			this.magListener = new SensorListener() {
-				public void onAccuracyChanged(int sensor, int changed) {
-					
-				}
-				
-				public void onSensorChanged(int sensor, float[] values) {
-					onMagnetic(values);
-				}
-			};
+			
+			if (useOrientation) {
+				// enable Sensors
+				enableSensors();
+			}
+
 			//
 			this.accel = new Point3D();
 			this.mag = new Point3D();
@@ -220,7 +259,7 @@ public class PadActivity extends Activity {
 			this.initRightButton(width, height);
 			this.initMidButton(width, height);
 		} catch (Exception ex) {
-			Log.d("pad", ex.toString());
+			Log.d(TAG, ex.toString());
 		}
 	}
 
@@ -325,8 +364,9 @@ public class PadActivity extends Activity {
 		// acquire screen lock
 		this.lock.acquire();
 		// set sensor
-		this.sensormanager.registerListener(this.accListener, SensorManager.SENSOR_ACCELEROMETER, SensorManager.SENSOR_DELAY_GAME);
-		this.sensormanager.registerListener(this.magListener, SensorManager.SENSOR_MAGNETIC_FIELD, SensorManager.SENSOR_DELAY_GAME);
+		if (this.useOrientation) {
+			enableSensors();
+		}
 	}
 	
 	public void onPause() {
@@ -336,8 +376,7 @@ public class PadActivity extends Activity {
 		// release screen lock
 		this.lock.release();
 		// release sensor
-		this.sensormanager.unregisterListener(this.accListener);
-		this.sensormanager.unregisterListener(this.magListener);
+		disableSensors();
 	}
 	
 	public void onStop() {
@@ -359,7 +398,7 @@ public class PadActivity extends Activity {
 			return false;
 		}
 		//
-		Log.d("pad", "keydown "+String.valueOf(keycode));
+//		Log.d(TAG, "keydown "+String.valueOf(keycode));
 		Object[] args = new Object[3];
 		args[0] = 0; /* key down */
 		args[1] = keycode;
@@ -368,7 +407,7 @@ public class PadActivity extends Activity {
 		try {
 			this.sender.send(msg);
 		} catch (Exception ex) {
-			Log.d("pad", ex.toString());
+			Log.d(TAG, ex.toString());
 		}
 		//
 		return true;
@@ -391,7 +430,7 @@ public class PadActivity extends Activity {
 			return false;
 		}
 		//
-		Log.d("pad", "keyup "+String.valueOf(keycode));
+//		Log.d(TAG, "keyup "+String.valueOf(keycode));
 		Object[] args = new Object[3];
 		args[0] = 1; /* key up */
 		args[1] = keycode;
@@ -400,7 +439,7 @@ public class PadActivity extends Activity {
 		try {
 			this.sender.send(msg);
 		} catch (Exception ex) {
-			Log.d("pad", ex.toString());
+			Log.d(TAG, ex.toString());
 		}
 		//
 		return true;
@@ -624,21 +663,17 @@ public class PadActivity extends Activity {
 	
 	private void onAccelerometer(float[] values) {
 		Point3D.copy(values, this.accel);
-		if (this.useOrientation) {
-			this.accelSet = true;
-			if (this.accelSet && this.magSet) {
-				this.moveMouseFromSensors();
-			}
+		this.accelSet = true;
+		if (this.accelSet && this.magSet) {
+			this.moveMouseFromSensors();
 		}
 	}
 	
 	private void onMagnetic(float[] values) {
 		Point3D.copy(values, this.mag);
-		if (this.useOrientation) {
-			this.magSet = true;
-			if (this.accelSet && this.magSet) {
-				this.moveMouseFromSensors();
-			}
+		this.magSet = true;
+		if (this.accelSet && this.magSet) {
+			this.moveMouseFromSensors();
 		}
 	}
 	
@@ -652,7 +687,7 @@ public class PadActivity extends Activity {
 		double dotY = Point3D.dot(this.currSpace.y, this.lastSpace.y);
 		double angleX = Math.acos(dotX)/Math.PI - 0.5;
 		double angleY = Math.acos(dotY)/Math.PI;
-		Log.d("pad", String.valueOf(angleX * 400)+", "+String.valueOf(angleY * 400));
+		Log.d(TAG, String.valueOf(angleX * 400)+", "+String.valueOf(angleY * 400));
 		//
 		this.sendMouseEvent(2, (float)(angleX * 400), (float)(0 * 400));
 		this.lastSpace.copy(this.currSpace);
@@ -669,13 +704,13 @@ public class PadActivity extends Activity {
 		args[0] = type;
 		args[1] = (float)(Math.pow(Math.abs(x), 1+((double)Settings.getSensitivity())/100d)) * xDir;
 		args[2] = (float)(Math.pow(Math.abs(y), 1+((double)Settings.getSensitivity())/100d)) * yDir;
-		Log.d("pad", String.valueOf(Settings.getSensitivity()));
+//		Log.d(TAG, String.valueOf(Settings.getSensitivity()));
 		//
 		OSCMessage msg = new OSCMessage("/mouse", args);
 		try {
 			this.sender.send(msg);
 		} catch (Exception ex) {
-			Log.d("pad", ex.toString());
+			Log.d(TAG, ex.toString());
 		}
 	}
 	
@@ -687,7 +722,7 @@ public class PadActivity extends Activity {
 		try {
 			this.sender.send(msg);
 		} catch (Exception ex) {
-			Log.d("pad", ex.toString());
+			Log.d(TAG, ex.toString());
 		}
 	}
 	
@@ -753,7 +788,7 @@ public class PadActivity extends Activity {
 		try {
 			this.sender.send(msg);
 		} catch (Exception ex) {
-			Log.d("pad", ex.toString());
+			Log.d(TAG, ex.toString());
 		}
 		// graphical feedback
 		this.handler.post(this.rLeftDown);
@@ -766,7 +801,7 @@ public class PadActivity extends Activity {
 		try {
 			this.sender.send(msg);
 		} catch (Exception ex) {
-			Log.d("pad", ex.toString());
+			Log.d(TAG, ex.toString());
 		}
 		// graphical feedback
 		this.handler.post(this.rLeftUp);
@@ -814,7 +849,7 @@ public class PadActivity extends Activity {
 		try {
 			this.sender.send(msg);
 		} catch (Exception ex) {
-			Log.d("pad", ex.toString());
+			Log.d(TAG, ex.toString());
 		}
 		// graphical feedback
 		this.handler.post(this.rRightDown);
@@ -827,7 +862,7 @@ public class PadActivity extends Activity {
 		try {
 			this.sender.send(msg);
 		} catch (Exception ex) {
-			Log.d("pad", ex.toString());
+			Log.d(TAG, ex.toString());
 		}
 		// graphical feedback
 		this.handler.post(this.rRightUp);
@@ -856,7 +891,7 @@ public class PadActivity extends Activity {
 		man.toggleSoftInputFromWindow ( this.ivMidButton.getWindowToken (),
 				InputMethodManager.SHOW_FORCED,
 				InputMethodManager.HIDE_IMPLICIT_ONLY ); 
-		//Log.d("RemoteDroid", "show keyboard result: "+String.valueOf(result));
+		//Log.d(TAG, "show keyboard result: "+String.valueOf(result));
 		//
 		
 	}
