@@ -1,0 +1,8 @@
+<AbsoluteLayout android:id="@+id/AbsoluteLayout01" android:layout_width="wrap_content" android:layout_height="wrap_content" xmlns:android="http://schemas.android.com/apk/res/android"><ImageView android:layout_width="wrap_content" android:layout_height="wrap_content" android:id="@+id/ivRect"></ImageView>
+
+<ImageView android:layout_width="wrap_content" android:layout_height="wrap_content" android:id="@+id/ivBtnRight"></ImageView>
+<ImageView android:layout_width="wrap_content" android:layout_height="wrap_content" android:id="@+id/ivScroll"></ImageView>
+
+<ImageView android:layout_width="wrap_content" android:layout_height="wrap_content" android:id="@+id/ivBtnLeft"></ImageView>
+<ImageView android:layout_width="wrap_content" android:layout_height="wrap_content" android:id="@+id/ivBtnSoft"></ImageView>
+</AbsoluteLayout>

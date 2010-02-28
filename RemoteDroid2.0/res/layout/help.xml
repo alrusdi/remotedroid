@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="vertical"
+    android:layout_width="fill_parent"
+    android:layout_height="fill_parent"
+    android:clickable="true" android:focusableInTouchMode="true">
+<TextView android:id="@+id/TextView01" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="@string/txt_help_dialog_0" android:layout_margin="5px"></TextView>
+<TextView android:id="@+id/TextView02" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="@string/txt_server_url" android:layout_margin="5px" android:textColor="#6666FF"></TextView><TextView android:id="@+id/TextView03" android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_margin="5px" android:text="@string/txt_help_dialog_1"></TextView><Button android:layout_width="wrap_content" android:layout_height="wrap_content" android:id="@+id/btnCloseHelp" android:text="@string/txt_close" android:layout_gravity="center_horizontal" android:width="100px"></Button>
+
+
+</LinearLayout>
