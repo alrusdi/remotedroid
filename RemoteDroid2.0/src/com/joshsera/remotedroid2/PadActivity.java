@@ -7,11 +7,6 @@ import java.util.TimerTask;
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
-import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
-import android.graphics.Canvas;
-import android.graphics.Paint;
-import android.graphics.Rect;
 import android.hardware.Sensor;
 import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
@@ -27,8 +22,7 @@ import android.view.View;
 import android.view.Window;
 import android.view.WindowManager;
 import android.view.inputmethod.InputMethodManager;
-import android.widget.AbsoluteLayout;
-import android.widget.ImageView;
+import android.widget.FrameLayout;
 
 import com.illposed.osc.OSCMessage;
 import com.illposed.osc.OSCPort;
@@ -58,42 +52,23 @@ public class PadActivity extends Activity {
 
 	//
 	private OSCPortOut sender;
-	//
-	private Paint black;
 	// thread and graphics stuff
 	private Handler handler = new Handler();
 	//
-	private ImageView ivLeftButton;
-	private Bitmap bmLeftButton;
-	private Canvas caLeftButton;
+	private FrameLayout flLeftButton;
 	private boolean leftToggle = false;
 	private Runnable rLeftDown;
 	private Runnable rLeftUp;
 	//
-	private ImageView ivRightButton;
-	private Bitmap bmRightButton;
-	private Canvas caRightButton;
+	private FrameLayout flRightButton;
 	private boolean rightToggle = false;
 	private Runnable rRightDown;
 	private Runnable rRightUp;
 	//
-	private ImageView ivMidButton;
-	private Bitmap bmMidButton;
-	private Bitmap bmSoftOff;
-	private Bitmap bmSoftOn;
-	private Canvas caMidButton;
+	private FrameLayout flMidButton;
 	private boolean softShown = false;
 	private Runnable rMidDown;
 	private Runnable rMidUp;
-	//
-	private Paint greenStroke;
-	private Paint greenFill;
-	//
-	private int buttonWidth;
-	private int buttonHeight;
-	//
-	int portraitHeight;
-	int portraitWidth;
 	//
 	private float xHistory;
 	private float yHistory;
@@ -123,10 +98,10 @@ public class PadActivity extends Activity {
 	private int tapState = TAP_NONE;
 	private Timer tapTimer;
 	// multitouch scroll
-	private float scrollX = 0f;
+	// private float scrollX = 0f;
 	private float scrollY = 0f;
 
-	static final float SCROLL_STEP = 10f;
+	static final float SCROLL_STEP = 12f;
 
 	public PadActivity() {
 		super();
@@ -211,22 +186,22 @@ public class PadActivity extends Activity {
 			// UI runnables
 			this.rLeftDown = new Runnable() {
 				public void run() {
-					drawButtonOn(caLeftButton, bmLeftButton, ivLeftButton);
+					drawButtonOn(flLeftButton);
 				}
 			};
 			this.rLeftUp = new Runnable() {
 				public void run() {
-					drawButtonOff(caLeftButton, bmLeftButton, ivLeftButton);
+					drawButtonOff(flLeftButton);
 				}
 			};
 			this.rRightDown = new Runnable() {
 				public void run() {
-					drawButtonOn(caRightButton, bmRightButton, ivRightButton);
+					drawButtonOn(flRightButton);
 				}
 			};
 			this.rRightUp = new Runnable() {
 				public void run() {
-					drawButtonOff(caRightButton, bmRightButton, ivRightButton);
+					drawButtonOff(flRightButton);
 				}
 			};
 			this.rMidDown = new Runnable() {
@@ -249,120 +224,61 @@ public class PadActivity extends Activity {
 			setContentView(R.layout.pad_layout);
 			DisplayMetrics dm = new DisplayMetrics();
 			this.getWindowManager().getDefaultDisplay().getMetrics(dm);
-			int width = dm.widthPixels;
-			int height = dm.heightPixels;
 			//
 			this.sender = new OSCPortOut(InetAddress.getByName(Settings.getIp()), OSCPort
 					.defaultSCOSCPort());
 			//
-			this.black = new Paint();
-			this.black.setARGB(255, 0, 0, 0);
-			this.greenFill = new Paint();
-			this.greenFill.setARGB(255, 0, 255, 0);
-			this.greenStroke = new Paint();
-			this.greenStroke.setARGB(255, 0, 255, 0);
-			this.greenStroke.setStyle(Paint.Style.STROKE);
-			this.buttonWidth = (int) (((double) width) * 0.5d) - 30;
-			this.buttonHeight = height / 3;
-			initTouchpad(width, height);
-			this.initLeftButton(width, height);
-			this.initRightButton(width, height);
-			this.initMidButton(width, height);
+			this.initTouchpad();
+			this.initLeftButton();
+			this.initRightButton();
+			this.initMidButton();
 		} catch (Exception ex) {
 			Log.d(TAG, ex.toString());
 		}
 	}
 
-	private void initTouchpad(int width, int height) {
-		int squWidth = width - 2;
-		int squHeight = height / 3 * 2;
-		ImageView iv = (ImageView) this.findViewById(R.id.ivRect);
-		Canvas ca = new Canvas();
-		Paint red = new Paint();
-		red.setStyle(Paint.Style.STROKE);
-		Bitmap bm = Bitmap.createBitmap(width, squHeight, Bitmap.Config.RGB_565);
-		red.setARGB(255, 255, 0, 0);
-		squHeight -= 2;
-		ca.setBitmap(bm);
-		this.drawSquare(ca, squWidth, squHeight, red);
-		iv.setImageBitmap(bm);
+	private void initTouchpad() {
+		FrameLayout fl = (FrameLayout) this.findViewById(R.id.flTouchPad);
+
 		// let's set up a touch thinger
-		iv.setOnTouchListener(new View.OnTouchListener() {
+		fl.setOnTouchListener(new View.OnTouchListener() {
 			public boolean onTouch(View v, MotionEvent ev) {
 				return onMouseMove(ev);
 			}
 		});
 	}
 
-	private void initLeftButton(int width, int height) {
-		ImageView iv = (ImageView) this.findViewById(R.id.ivBtnLeft);
-		Canvas ca = new Canvas();
-		Bitmap bm = Bitmap.createBitmap(this.buttonWidth, this.buttonHeight, Bitmap.Config.RGB_565);
-		ca.setBitmap(bm);
-		this.drawSquare(ca, this.buttonWidth - 2, this.buttonHeight - 2, this.greenStroke);
-		iv.setImageBitmap(bm);
+	private void initLeftButton() {
+		FrameLayout fl = (FrameLayout) this.findViewById(R.id.flLeftButton);
 		// listener
-		iv.setOnTouchListener(new View.OnTouchListener() {
+		fl.setOnTouchListener(new View.OnTouchListener() {
 			public boolean onTouch(View v, MotionEvent ev) {
 				return onLeftTouch(ev);
 			}
 		});
-		// position the button
-		AbsoluteLayout.LayoutParams params = (AbsoluteLayout.LayoutParams) iv.getLayoutParams();
-		params.y = this.buttonHeight * 2;
-		// reference some stuff
-		this.ivLeftButton = iv;
-		this.caLeftButton = ca;
-		this.bmLeftButton = bm;
+		this.flLeftButton = fl;
 	}
 
-	private void initRightButton(int width, int height) {
-		ImageView iv = (ImageView) this.findViewById(R.id.ivBtnRight);
-		Canvas ca = new Canvas();
-		Bitmap bm = Bitmap.createBitmap(this.buttonWidth, this.buttonHeight, Bitmap.Config.RGB_565);
-		ca.setBitmap(bm);
-		this.drawSquare(ca, this.buttonWidth - 2, this.buttonHeight - 2, this.greenStroke);
-		iv.setImageBitmap(bm);
+	private void initRightButton() {
+		FrameLayout iv = (FrameLayout) this.findViewById(R.id.flRightButton);
 		// listener
 		iv.setOnTouchListener(new View.OnTouchListener() {
 			public boolean onTouch(View v, MotionEvent ev) {
 				return onRightTouch(ev);
 			}
 		});
-		// position the button
-		AbsoluteLayout.LayoutParams params = (AbsoluteLayout.LayoutParams) iv.getLayoutParams();
-		params.y = this.buttonHeight * 2;
-		params.x = this.buttonWidth + 60;
-		//
-		this.ivRightButton = iv;
-		this.caRightButton = ca;
-		this.bmRightButton = bm;
+		this.flRightButton = iv;
 	}
 
-	private void initMidButton(int width, int height) {
-		ImageView iv = (ImageView) this.findViewById(R.id.ivBtnSoft);
-		Canvas ca = new Canvas();
-		Bitmap bm = Bitmap.createBitmap(60, this.buttonHeight, Bitmap.Config.RGB_565);
-		ca.setBitmap(bm);
-		Bitmap bg = BitmapFactory.decodeResource(this.getResources(), R.drawable.softkeyoff);
-		ca.drawBitmap(bg, 10, ((float) this.buttonHeight) / 2 - 20, null);
-		iv.setImageBitmap(bm);
+	private void initMidButton() {
+		FrameLayout fl = (FrameLayout) this.findViewById(R.id.flKeyboardButton);
 		// listener
-		iv.setOnTouchListener(new View.OnTouchListener() {
+		fl.setOnTouchListener(new View.OnTouchListener() {
 			public boolean onTouch(View v, MotionEvent ev) {
 				return onMidTouch(ev);
 			}
 		});
-		// position
-		AbsoluteLayout.LayoutParams params = (AbsoluteLayout.LayoutParams) iv.getLayoutParams();
-		params.y = this.buttonHeight * 2;
-		params.x = this.buttonWidth;
-		//
-		this.ivMidButton = iv;
-		this.caMidButton = ca;
-		this.bmMidButton = bm;
-		this.bmSoftOff = bg;
-		this.bmSoftOn = BitmapFactory.decodeResource(this.getResources(), R.drawable.softkeyon);
+		this.flMidButton = fl;
 	}
 
 	public void onStart() {
@@ -497,14 +413,12 @@ public class PadActivity extends Activity {
 
 		int pointerCount = ev.getPointerCount();
 
-		// for (int i = 0; i < pointerCount; i++) {
-		// int pointerId = ev.getPointerId(i);
-		//			
-		// Log.v("Nicolas", "[Id=" + i + " - Index=" + i + "] X=" +
-		// ev.getX(pointerId) + " Y="
-		// + ev.getY(pointerId) + " Pressure="
-		// + ev.getPressure(pointerId));
-		// }
+//		for (int i = 0; i < pointerCount; i++) {
+//			int pointerId = ev.getPointerId(i);
+//
+//			Log.v(TAG, "[Id=" + i + " - Index=" + i + "] X=" + ev.getX(pointerId) + " Y="
+//					+ ev.getY(pointerId) + " Pressure=" + ev.getPressure(pointerId));
+//		}
 
 		switch (ev.getAction()) {
 		case MotionEvent.ACTION_DOWN:
@@ -923,52 +837,36 @@ public class PadActivity extends Activity {
 		// boolean result = man.showSoftInput(this.findViewById(R.id.ivBtnSoft),
 		// InputMethodManager.SHOW_IMPLICIT, new
 		// SoftResultReceiver(this.handler));
-		man.toggleSoftInputFromWindow(this.ivMidButton.getWindowToken(),
+		man.toggleSoftInputFromWindow(this.flMidButton.getWindowToken(),
 				InputMethodManager.SHOW_FORCED, InputMethodManager.HIDE_IMPLICIT_ONLY);
 		// Log.d(TAG, "show keyboard result: "+String.valueOf(result));
 		//
 
 	}
 
-	private void midButtonUp() {
-		InputMethodManager man = (InputMethodManager) this.getApplicationContext()
-				.getSystemService(INPUT_METHOD_SERVICE);
-		//
-		man.toggleSoftInputFromWindow(this.ivMidButton.getWindowToken(),
-				InputMethodManager.SHOW_FORCED, InputMethodManager.HIDE_IMPLICIT_ONLY);
+	// private void midButtonUp() {
+	// InputMethodManager man = (InputMethodManager)
+	// this.getApplicationContext()
+	// .getSystemService(INPUT_METHOD_SERVICE);
+	// //
+	// man.toggleSoftInputFromWindow(this.ivMidButton.getWindowToken(),
+	// InputMethodManager.SHOW_FORCED, InputMethodManager.HIDE_IMPLICIT_ONLY);
+	//
+	// }
 
+	private void drawButtonOn(FrameLayout fl) {
+		fl.setBackgroundResource(R.drawable.left_button_on);
 	}
 
-	// drawing
-
-	private void drawSquare(Canvas ca, int width, int height, Paint color) {
-		//
-		Rect r = new Rect();
-		r.set(0, 0, width, height);
-		ca.drawRect(r, color);
-	}
-
-	private void drawButtonOn(Canvas ca, Bitmap bm, ImageView iv) {
-		this.drawSquare(ca, this.buttonWidth - 2, this.buttonHeight - 2, this.black);
-		this.drawSquare(ca, this.buttonWidth - 2, this.buttonHeight - 2, this.greenFill);
-		iv.setImageBitmap(bm);
-	}
-
-	private void drawButtonOff(Canvas ca, Bitmap bm, ImageView iv) {
-		this.drawSquare(ca, this.buttonWidth - 2, this.buttonHeight - 2, this.black);
-		this.drawSquare(ca, this.buttonWidth - 2, this.buttonHeight - 2, this.greenStroke);
-		iv.setImageBitmap(bm);
+	private void drawButtonOff(FrameLayout fl) {
+		fl.setBackgroundResource(R.drawable.left_button_off);
 	}
 
 	private void drawSoftOn() {
-		this.drawSquare(this.caMidButton, 60, this.buttonHeight, this.greenFill);
-		this.caMidButton.drawBitmap(this.bmSoftOn, 10, ((float) this.buttonHeight) / 2 - 20, null);
-		this.ivMidButton.setImageBitmap(this.bmMidButton);
+		this.flMidButton.setBackgroundResource(R.drawable.keyboard_on);
 	}
 
 	private void drawSoftOff() {
-		this.drawSquare(this.caMidButton, 60, this.buttonHeight, this.black);
-		this.caMidButton.drawBitmap(this.bmSoftOff, 10, ((float) this.buttonHeight) / 2 - 20, null);
-		this.ivMidButton.setImageBitmap(this.bmMidButton);
+		this.flMidButton.setBackgroundResource(R.drawable.keyboard_off);
 	}
 }
