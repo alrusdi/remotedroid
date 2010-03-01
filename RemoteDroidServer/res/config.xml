@@ -22,7 +22,6 @@
 	
 	<key name="" code="" modshift="" modified="" localcode="" />
 	-->
-	<key name="trackbutton" code="23" modshift="0" modified="-1" localcode="157" />
 	<key name="q" code="45" modshift="0" modified="9" localcode="81" />
 	<key name="w" code="51" modshift="0" modified="222" localcode="87" />
 	<key name="e" code="33" modshift="1" modified="45" localcode="69" />
