@@ -135,6 +135,9 @@ public class PadActivity extends Activity {
 		}
 	}
 
+	/* (non-Javadoc)
+	 * @see android.app.Activity#onCreate(android.os.Bundle)
+	 */
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		Settings.init(this.getApplicationContext());
@@ -411,7 +414,10 @@ public class PadActivity extends Activity {
 		float xMove = 0f;
 		float yMove = 0f;
 
-		int pointerCount = ev.getPointerCount();
+		int pointerCount = 1;
+		if (WrappedMotionEvent.isMutitouchCapable()) {
+			pointerCount = WrappedMotionEvent.getPointerCount(ev);
+		}
 
 //		for (int i = 0; i < pointerCount; i++) {
 //			int pointerId = ev.getPointerId(i);
@@ -505,17 +511,17 @@ public class PadActivity extends Activity {
 				// multitouch scroll
 				type = -1;
 
-				int pointer0 = ev.getPointerId(0);
-				int pointer1 = ev.getPointerId(1);
+				int pointer0 = WrappedMotionEvent.getPointerId(ev, 0);
+				int pointer1 = WrappedMotionEvent.getPointerId(ev, 1);
 
-				float posX = ev.getX(pointer0);
-				float posY = ev.getY(pointer0);
+				float posX = WrappedMotionEvent.getX(ev, pointer0);
+				float posY = WrappedMotionEvent.getY(ev, pointer0);
 
 				// only consider the second pointer if I had a previous history
 				if (lastPointerCount == 2) {
-					posX += ev.getX(pointer1);
+					posX += WrappedMotionEvent.getX(ev, pointer1);
 					posX /= 2;
-					posY += ev.getY(pointer1);
+					posY += WrappedMotionEvent.getY(ev, pointer1);
 					posY /= 2;
 
 					xMove = posX - this.xHistory;
@@ -524,9 +530,9 @@ public class PadActivity extends Activity {
 					xMove = posX - this.xHistory;
 					yMove = posY - this.yHistory;
 
-					posX += ev.getX(pointer1);
+					posX += WrappedMotionEvent.getX(ev, pointer1);
 					posX /= 2;
-					posY += ev.getY(pointer1);
+					posY += WrappedMotionEvent.getY(ev, pointer1);
 					posY /= 2;
 				}
 
@@ -706,14 +712,17 @@ public class PadActivity extends Activity {
 	 * @param ev
 	 */
 	private void moveMouseWithSecondFinger(MotionEvent ev) {
-		int pointerCount = ev.getPointerCount();
+		if (! WrappedMotionEvent.isMutitouchCapable()) {
+			return;
+		}
+		int pointerCount = WrappedMotionEvent.getPointerCount(ev);
 		// if it is a multitouch move event
 		if (pointerCount == 2) {
 			// int pointer0 = ev.getPointerId(0);
-			int pointer1 = ev.getPointerId(1);
+			int pointer1 = WrappedMotionEvent.getPointerId(ev, 1);
 
-			float x = ev.getX(pointer1);
-			float y = ev.getY(pointer1);
+			float x = WrappedMotionEvent.getX(ev, pointer1);
+			float y = WrappedMotionEvent.getY(ev, pointer1);
 
 			if (lastPointerCount == 2) {
 				float xMove = x - this.xHistory;
