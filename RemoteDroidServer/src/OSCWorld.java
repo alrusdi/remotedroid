@@ -202,6 +202,14 @@ public class OSCWorld extends World {
 		switch (type) {
 			case 0:
 				// key down
+				
+				// check if it isn't a mouse click (trackpad "enter" = left button)
+				if (this.translator.isLeftClick(keycode)) {
+					buttonEvent(0, 0);
+					return;
+				}
+				
+				// it's not a mouse event, treat as key
 				if (this.translator.isModifier(keycode)) {
 					this.modified = true;
 				}
@@ -237,6 +245,14 @@ public class OSCWorld extends World {
 				break;
 			case 1:
 				// key up
+				
+				// check if it isn't a mouse click (trackpad "enter" = left button)
+				if (this.translator.isLeftClick(keycode)) {
+					buttonEvent(1, 0);
+					return;
+				}
+				
+				// it's not a mouse event, treat as key
 				if (this.translator.isModifier(keycode)) {
 					this.modified = false;
 				}

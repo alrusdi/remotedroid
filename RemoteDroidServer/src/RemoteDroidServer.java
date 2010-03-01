@@ -1,6 +1,6 @@
 
-import java.awt.event.*;
-import java.util.*;
+import java.awt.event.WindowAdapter;
+import java.awt.event.WindowEvent;
 
 /**
  * to-do:

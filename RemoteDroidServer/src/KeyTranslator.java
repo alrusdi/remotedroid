@@ -1,13 +1,15 @@
-import org.w3c.dom.*;
-import org.xml.sax.SAXException;
-
 import java.io.File;
 import java.io.IOException;
-import java.util.*;
+import java.util.HashMap;
 
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
+
+import org.w3c.dom.Document;
+import org.w3c.dom.Element;
+import org.w3c.dom.NodeList;
+import org.xml.sax.SAXException;
 
 public class KeyTranslator {
 	//
@@ -16,6 +18,7 @@ public class KeyTranslator {
 	private int[] modifiers;
 	private int[] shifts;
 	private int[] ctrls;
+	private int[] leftClicks;
 	//
 	protected Document myDoc;
 	
@@ -85,6 +88,13 @@ public class KeyTranslator {
 			//
 			this.codes.put(new Integer(keycode), data);
 		}
+		// simulated mouse button
+		mods = config.getElementsByTagName("leftclick");
+		l = mods.getLength();
+		this.leftClicks = new int[l];
+		for (i=0;i<l;++i) {
+			this.leftClicks[i] = Integer.parseInt(((Element)mods.item(i)).getAttribute("code"));
+		}
 	}
 	
 	public boolean isModifier(int keycode) {
@@ -119,4 +129,16 @@ public class KeyTranslator {
 		}
 		return false;
 	}
+	
+	public boolean isLeftClick(int keycode) {
+		int i;
+		int l = this.leftClicks.length;
+		for (i=0;i<l;++i) {
+			if (keycode == this.leftClicks[i]) {
+				return true;
+			}
+		}
+		return false;
+	}
+	
 }

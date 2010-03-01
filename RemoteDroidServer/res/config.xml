@@ -71,4 +71,5 @@
 	<key name="trackdown" code="20" modshift="0" modified="-1" localcode="40" />
 	<key name="trackleft" code="21" modshift="0" modified="-1" localcode="37" />
 	<key name="trackright" code="22" modshift="0" modified="-1" localcode="39" />
+	<leftclick name="trackbutton" code="23"/>
 </config>
