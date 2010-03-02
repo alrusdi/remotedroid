@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+	android:layout_width="fill_parent" android:layout_height="fill_parent">
+	<TextView android:text="@string/app_name" android:id="@+id/tvTitle"
+		android:layout_width="wrap_content" android:layout_height="wrap_content"
+		android:textSize="20dp" android:textStyle="bold"
+		android:layout_centerHorizontal="true"></TextView>
+
+	<TextView android:layout_width="fill_parent" android:id="@+id/tvInstructions"
+		android:layout_height="wrap_content" android:text="@string/txt_ip_address"
+		android:layout_gravity="left" android:layout_marginLeft="5dp"
+		android:layout_marginRight="5dp" android:layout_marginTop="5dp"
+		android:layout_below="@id/tvTitle" android:layout_marginBottom="0dp" />
+
+
+	<Button android:layout_width="wrap_content"
+		android:layout_height="wrap_content" android:text="@string/txt_connect"
+		android:layout_marginLeft="0dp" android:layout_marginTop="5dp"
+		android:layout_marginRight="5dp" android:layout_marginBottom="5dp"
+		android:id="@+id/btnConnect" android:layout_gravity="left"
+		android:layout_alignParentRight="true" android:layout_below="@id/tvInstructions" />
+	<EditText android:layout_height="wrap_content"
+		android:focusable="true" android:enabled="true" android:id="@+id/etIp"
+		android:layout_marginLeft="5dp" android:layout_marginTop="5dp"
+		android:layout_marginRight="0dp" android:layout_marginBottom="5dp"
+		android:layout_width="fill_parent" android:layout_below="@id/tvInstructions"
+		android:text="192.168.255.255" android:layout_toLeftOf="@id/btnConnect" />
+
+	<TextView android:id="@+id/tvPrefs" android:layout_width="wrap_content"
+		android:layout_height="wrap_content" android:text="@string/txt_prefs_copy"
+		android:layout_marginLeft="5px" android:layout_marginRight="5px"
+		android:layout_marginTop="0px" android:layout_marginBottom="5px"
+		android:layout_below="@id/etIp" />
+
+	<TextView android:id="@+id/tvRecentHosts"
+		android:layout_width="wrap_content" android:layout_height="wrap_content"
+		android:layout_marginLeft="5px" android:text="@string/txt_recentlyUsedHosts"
+		android:layout_marginTop="5px" android:layout_marginBottom="5px"
+		android:textStyle="bold" android:layout_centerHorizontal="true"
+		android:layout_below="@id/tvPrefs" />
+	<ListView android:id="@+id/lvHosts" android:layout_width="fill_parent"
+		android:layout_height="fill_parent" android:layout_alignParentBottom="true"
+		android:layout_below="@id/tvRecentHosts"/>
+
+</RelativeLayout>

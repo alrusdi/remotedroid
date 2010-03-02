@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="fill_parent"
+    android:layout_height="fill_parent"
+    android:focusableInTouchMode="true" android:orientation="vertical">
+
+
+
+
+
+
+
+
+
+<ScrollView android:id="@+id/ScrollView01" android:layout_width="fill_parent" android:layout_height="fill_parent">
+	<LinearLayout android:id="@+id/LinearLayout01" android:layout_height="wrap_content" android:orientation="vertical" android:layout_width="fill_parent" android:padding="5px">
+		<TextView android:id="@+id/TextView04" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="@string/txt_preferences" android:textColor="#FFF" android:textSize="20px" android:layout_gravity="center_horizontal"></TextView>
+		<TextView android:id="@+id/TextView01" android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_gravity="left" android:textColor="#FFF" android:text="Tap-to-click" android:textSize="16px"></TextView>
+		<CheckBox android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Enabled" android:layout_gravity="left" android:textSize="16px" android:id="@+id/cbTap" android:focusable="true"></CheckBox>
+		<TextView android:id="@+id/TextView02" android:layout_width="wrap_content" android:layout_height="wrap_content" android:textSize="16px" android:text="Tap speed" android:textColor="#FFF"></TextView>
+		<SeekBar android:layout_height="wrap_content" android:layout_width="fill_parent" android:visibility="visible" android:fadingEdge="horizontal" android:id="@+id/sbClick" android:max="1000" android:focusable="true"></SeekBar>
+		<TextView android:id="@+id/TextView03" android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_gravity="left" android:text="Use trackball as mouse wheel" android:textColor="#FFF" android:textSize="16px" android:layout_marginTop="10px"></TextView>
+		<CheckBox android:layout_width="wrap_content" android:layout_height="wrap_content" android:id="@+id/cbTrackAsScroll" android:text="Enabled" android:textColor="#FFF" android:textSize="16px" android:focusable="true"></CheckBox>
+		<TextView android:id="@+id/TextView04" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Mouse Sensitivity" android:textColor="#FFF" android:textSize="16px"></TextView>
+		<SeekBar android:layout_height="wrap_content" android:layout_width="fill_parent" android:max="100" android:id="@+id/sbSensitivity" android:focusable="true" android:fadingEdge="horizontal" android:visibility="visible"></SeekBar>
+		<Button android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_gravity="center_horizontal" android:id="@+id/btnSavePrefs" android:text="@string/txt_save" android:layout_marginTop="10px" android:focusable="true"></Button>
+
+	</LinearLayout>
+</ScrollView>
+
+</LinearLayout>
