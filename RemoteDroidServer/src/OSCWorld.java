@@ -208,12 +208,13 @@ public class OSCWorld extends World {
 	}
 
 	private void scrollEvent(int dir) {
-		this.robot.mouseWheel(dir * this.scrollMod);
+		this.robot.mouseWheel(-dir * this.scrollMod);
 	}
 
 	private void keyboardEvent(int type, int keycode, String value) {
 		//
 		KeyCodeData data;
+		
 		switch (type) {
 		case 0:
 			// key down
@@ -223,7 +224,8 @@ public class OSCWorld extends World {
 				buttonEvent(0, 0);
 				return;
 			}
-
+			//
+			data = (KeyCodeData) translator.codes.get(new Integer(keycode));
 			// it's not a mouse event, treat as key
 			if (this.translator.isModifier(keycode)) {
 				this.modified = true;
@@ -235,28 +237,36 @@ public class OSCWorld extends World {
 			if (this.translator.isCtrl(keycode)) {
 				this.keyPress(KeyEvent.VK_CONTROL);
 			}
-			data = (KeyCodeData) translator.codes.get(new Integer(keycode));
 			if (data != null) {
+				// for some of the symbols, like at.
+				if (!this.shifted && data.shifted) {
+					this.keyPress(KeyEvent.VK_SHIFT);
+				}
 				if (this.modified) {
-					if (data.shifted && !this.shifted) {
+					if (data.modshifted && !this.shifted) {
 						this.keyPress(KeyEvent.VK_SHIFT);
+						//System.out.println("Keycode:"+String.valueOf(keycode)+", local:"+String.valueOf(data.localcode));
 					}
-					if (!data.shifted && this.shifted) {
+					if (!data.modshifted && this.shifted) {
 						this.keyRelease(KeyEvent.VK_SHIFT);
 					}
 					//
 					if (data.modifiedcode != -1)
 						this.keyPress(data.modifiedcode);
 					//
-					if (data.shifted && !this.shifted) {
+					if (data.modshifted && !this.shifted) {
 						this.keyRelease(KeyEvent.VK_SHIFT);
 					}
-					if (!data.shifted && this.shifted) {
+					if (!data.modshifted && this.shifted) {
 						this.keyPress(KeyEvent.VK_SHIFT);
 					}
 				} else {
 					try {
-						this.keyPress(data.localcode);
+						if (this.shifted && data.shiftedcode != -1) {
+							this.keyPress(data.shiftedcode);
+						} else {
+							this.keyPress(data.localcode);
+						}
 					} catch (IllegalArgumentException e) {
 						System.out.println("Invalid key code: " + data.localcode);
 					}
@@ -271,7 +281,8 @@ public class OSCWorld extends World {
 				buttonEvent(1, 0);
 				return;
 			}
-
+			//
+			data = (KeyCodeData) translator.codes.get(new Integer(keycode));
 			// it's not a mouse event, treat as key
 			if (this.translator.isModifier(keycode)) {
 				this.modified = false;
@@ -283,27 +294,34 @@ public class OSCWorld extends World {
 			if (this.translator.isCtrl(keycode)) {
 				keyRelease(KeyEvent.VK_CONTROL);
 			}
-			data = (KeyCodeData) translator.codes.get(new Integer(keycode));
 			if (data != null) {
+				// for some of the symbols, like at.
+				if (!this.shifted && data.shifted) {
+					this.keyRelease(KeyEvent.VK_SHIFT);
+				}
 				if (this.modified) {
-					if (data.shifted && !this.shifted) {
+					if (data.modshifted && !this.shifted) {
 						this.keyPress(KeyEvent.VK_SHIFT);
 					}
-					if (!data.shifted && this.shifted) {
+					if (!data.modshifted && this.shifted) {
 						this.keyRelease(KeyEvent.VK_SHIFT);
 					}
 					//
 					if (data.modifiedcode != -1)
 						this.keyRelease(data.modifiedcode);
 					//
-					if (data.shifted && !this.shifted) {
+					if (data.modshifted && !this.shifted) {
 						this.keyRelease(KeyEvent.VK_SHIFT);
 					}
-					if (!data.shifted && this.shifted) {
+					if (!data.modshifted && this.shifted) {
 						this.keyPress(KeyEvent.VK_SHIFT);
 					}
 				} else {
-					this.keyRelease(data.localcode);
+					if (this.shifted && data.shiftedcode != -1) {
+						this.keyRelease(data.shiftedcode);
+					} else {
+						this.keyRelease(data.localcode);
+					}
 				}
 			}
 			break;

@@ -81,9 +81,11 @@ public class KeyTranslator {
 			data = new KeyCodeData();
 			keydata = (Element)mods.item(i);
 			data.name = keydata.getAttribute("name");
-			data.shifted = "1".compareTo(keydata.getAttribute("modshift")) == 0;
+			data.modshifted = "1".compareTo(keydata.getAttribute("modshift")) == 0;
 			data.localcode = Integer.parseInt(keydata.getAttribute("localcode"));
 			data.modifiedcode = Integer.parseInt(keydata.getAttribute("modified"));
+			data.shifted = "1".compareTo(keydata.getAttribute("shifted")) == 0;
+			data.shiftedcode = Integer.parseInt(keydata.getAttribute("shiftedcode"));
 			keycode = Integer.parseInt(keydata.getAttribute("code"));
 			//
 			this.codes.put(new Integer(keycode), data);
