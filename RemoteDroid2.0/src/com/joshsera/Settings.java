@@ -7,56 +7,61 @@ import android.content.SharedPreferences;
 import android.view.KeyCharacterMap;
 
 public class Settings {
-	private static String ip;
+	public static String ip;
 	public static KeyCharacterMap charmap;
-	// object so we can test vs. null in the getter.
-	private static Boolean tapToClick;
-	// cached value for performance
-	private static boolean tapValue;
-	// object so we can test vs. null in the getter.
-	private static Integer clickTime;
-	// cached value for performance
-	private static int clickValue;
-	// object so we can test vs. null in the getter.
-	private static Boolean trackAsScroll;
-	// cached value for performance
-	private static boolean trackValue;
-	// object so we can test vs. null in the getter.
-	private static Integer sensitivity;
-	// cached value for performance
-	private static int sensitivityValue;
+
+	public static boolean tapToClick;
+	public static int clickTime;
+	public static int sensitivity;
+	public static int scrollSensitivity;
+	public static boolean scrollInverted;
+	// public static boolean trackValue;
+
 	//
 	private static SharedPreferences prefs;
 	//
-	public static final String PREFS_IPKEY = "remoteip";
-	public static final String PREFS_TRACKASSCROLL = "trackasscroll";
-	public static final String PREFS_TAPTOCLICK = "tapclick";
-	public static final String PREFS_TAPTIME = "taptime";
-	public static final String PREFS_SENSITIVITY = "sensitivity";
+	private static final String PREFS_IPKEY = "remoteip";
+//	private static final String PREFS_TRACKASSCROLL = "trackasscroll";
+	private static final String PREFS_TAPTOCLICK = "tapclick";
+	private static final String PREFS_TAPTIME = "taptime";
+	private static final String PREFS_SENSITIVITY = "sensitivity";
 	private static final String PREFS_RECENT_IP_PREFIX = "recenthost";
+	private static final String PREFS_SCROLL_SENSITIVITY = "scrollSensitivity";
+	private static final String PREFS_SCROLL_INVERTED = "scrollInverted";
 	//
 	private static final String PREFS_FILENAME = "RemoteDroid";
-	//number of hosts to save in the history
+	// number of hosts to save in the history
 	public static final int MAX_SAVED_HOSTS = 5;
 
 	/**
-	 * this is the working data set of the saved hosts in the history
-	 * this mirrors the data in the settings
+	 * this is the working data set of the saved hosts in the history this
+	 * mirrors the data in the settings
 	 */
-	private static LinkedList<String> recentIPs;	
+	public static LinkedList<String> savedHosts;
 
 	public static void init(Context con) {
 		if (prefs == null) {
 			prefs = con.getSharedPreferences(PREFS_FILENAME, Context.MODE_PRIVATE);
 			charmap = KeyCharacterMap.load(KeyCharacterMap.BUILT_IN_KEYBOARD);
 			// set up the stack for the saved hosts
-			recentIPs = new LinkedList<String>();
+			savedHosts = new LinkedList<String>();
 			populateRecentIPs();
+
+			// get all preferences
+			ip = prefs.getString(PREFS_IPKEY, "127.0.0.1");
+			tapToClick = prefs.getBoolean(PREFS_TAPTOCLICK, true);
+			clickTime = prefs.getInt(Settings.PREFS_TAPTIME, 200);
+			sensitivity = prefs.getInt(Settings.PREFS_SENSITIVITY, 0);
+			scrollSensitivity = prefs.getInt(Settings.PREFS_SCROLL_SENSITIVITY, 50);
+			scrollInverted = prefs.getBoolean(PREFS_SCROLL_INVERTED, false);
+			// trackAsScroll = new Boolean(prefs.getBoolean(PREFS_TRACKASSCROLL,
+			// false));
+			// trackValue = trackAsScroll.booleanValue();
 
 		}
 	}
 
-	public static void setIp(String ip) throws Exception{
+	public static void setIp(String ip) throws Exception {
 		SharedPreferences.Editor edit = prefs.edit();
 		testIPValid(ip);
 		edit.putString(Settings.PREFS_IPKEY, ip);
@@ -65,31 +70,30 @@ public class Settings {
 
 		// save ip into a list of most used hosts here:
 		// push IP onto recent stack
-		if (!recentIPs.contains(ip)){
-			if (recentIPs.size() < MAX_SAVED_HOSTS) {
-				recentIPs.addFirst(ip);
+		if (!savedHosts.contains(ip)) {
+			if (savedHosts.size() < MAX_SAVED_HOSTS) {
+				savedHosts.addFirst(ip);
 			} else {
-				recentIPs.removeLast();
-				recentIPs.addFirst(ip);
+				savedHosts.removeLast();
+				savedHosts.addFirst(ip);
 			}
 		} else {
-			while (recentIPs.contains(ip)){
-				recentIPs.remove(ip);
+			while (savedHosts.contains(ip)) {
+				savedHosts.remove(ip);
 			}
-			recentIPs.addFirst(ip);
+			savedHosts.addFirst(ip);
 		}
 		// save recent ips to settings
 		writeRecentIPsToSettings();
 
-
 	}
 
-	private static void testIPValid(String ip) throws Exception{
-		try {		
+	private static void testIPValid(String ip) throws Exception {
+		try {
 			String[] octets = ip.split("\\.");
-			for (String s:octets){
+			for (String s : octets) {
 				int i = Integer.parseInt(s);
-				if (i > 255 || i < 0){
+				if (i > 255 || i < 0) {
 					throw new NumberFormatException();
 				}
 			}
@@ -97,91 +101,58 @@ public class Settings {
 			throw new Exception("Illegal IP address!");
 		}
 
-
 	}
 
-	public static LinkedList<String> getSavedHosts(){
-		return recentIPs;
-	}
-
-	private static void writeRecentIPsToSettings(){
+	private static void writeRecentIPsToSettings() {
 		SharedPreferences.Editor edit = prefs.edit();
 		String s;
-		for (int i=0; i<MAX_SAVED_HOSTS ; ++i){
+		for (int i = 0; i < MAX_SAVED_HOSTS; ++i) {
 			try {
-				s = recentIPs.get(i);
+				s = savedHosts.get(i);
 			} catch (IndexOutOfBoundsException e) {
 				s = null;
 			}
-			edit.putString(PREFS_RECENT_IP_PREFIX+((Integer)i).toString(), s);
+			edit.putString(PREFS_RECENT_IP_PREFIX + ((Integer) i).toString(), s);
 		}
 		edit.commit();
 	}
 
-	private static void populateRecentIPs(){
-		recentIPs.clear();
-		for (int i=0;i<MAX_SAVED_HOSTS; ++i){
-			String host = prefs.getString(PREFS_RECENT_IP_PREFIX+((Integer)i).toString(), null);
+	private static void populateRecentIPs() {
+		savedHosts.clear();
+		for (int i = 0; i < MAX_SAVED_HOSTS; ++i) {
+			String host = prefs.getString(PREFS_RECENT_IP_PREFIX + ((Integer) i).toString(), null);
 			if (host != null) {
-				recentIPs.add(host);
+				savedHosts.add(host);
 			}
 		}
 	}
 
 	// deletes a saved host from the list of saved hosts, by string
-	public static void removeSavedHost(CharSequence ip) throws Exception{
+	public static void removeSavedHost(CharSequence ip) throws Exception {
 
 		// remove ip from list
-		if (recentIPs.remove(ip.toString())){
+		if (savedHosts.remove(ip.toString())) {
 			// rewrite settings
 			writeRecentIPsToSettings();
 
 		} else {
-			throw new Exception("did not find "+ip.toString()+" in saved host list");
+			throw new Exception("did not find " + ip.toString() + " in saved host list");
 		}
 	}
 
-	public static String getIp() {
-		if (ip == null) {
-			ip = prefs.getString(PREFS_IPKEY, "127.0.0.1");
-		}
-		return ip;
-	}
-
-	public static void setTrackAsScroll(boolean trackAsScroll) {
-		SharedPreferences.Editor edit = prefs.edit();
-		edit.putBoolean(Settings.PREFS_TRACKASSCROLL, trackAsScroll);
-		edit.commit();
-		Settings.trackAsScroll = new Boolean(trackAsScroll);
-		trackValue = Settings.trackAsScroll.booleanValue();
-	}
-
-	// mousing with the trackball is out, since it was annoying anyway. Trackball press now acts
-	// as CTRL
-	public static boolean getTrackAsScroll() {
-		/*
-		if (trackAsScroll == null) {
-			trackAsScroll = new Boolean(prefs.getBoolean(PREFS_TRACKASSCROLL, false));
-			trackValue = trackAsScroll.booleanValue();
-		}
-		*/
-		return true;
-	}
+//	public static void setTrackAsScroll(boolean trackAsScroll) {
+//		SharedPreferences.Editor edit = prefs.edit();
+//		edit.putBoolean(Settings.PREFS_TRACKASSCROLL, trackAsScroll);
+//		edit.commit();
+//		// Settings.trackAsScroll = new Boolean(trackAsScroll);
+//		// trackValue = Settings.trackAsScroll.booleanValue();
+//	}
 
 	public static void setTapToClick(boolean tapToClick) {
 		SharedPreferences.Editor edit = prefs.edit();
 		edit.putBoolean(Settings.PREFS_TAPTOCLICK, tapToClick);
 		edit.commit();
-		Settings.tapToClick = new Boolean(tapToClick);
-		Settings.tapValue = Settings.tapToClick.booleanValue();
-	}
-
-	public static boolean getTapToClick() {
-		if (tapToClick == null) {
-			tapToClick = new Boolean(prefs.getBoolean(PREFS_TAPTOCLICK, true));
-			tapValue = tapToClick.booleanValue();
-		}
-		return tapValue;
+		Settings.tapToClick = tapToClick;
 	}
 
 	public static void setClickTime(int clickTime) {
@@ -189,32 +160,28 @@ public class Settings {
 		edit.putInt(Settings.PREFS_TAPTIME, clickTime);
 		edit.commit();
 		Settings.clickTime = clickTime;
-		clickValue = Settings.clickTime.intValue();
-	}
-
-	public static int getClickTime() {
-		if (clickTime == null) {
-			clickTime = new Integer(prefs.getInt(Settings.PREFS_TAPTIME, 200));
-			clickValue = clickTime.intValue();
-		}
-		return clickValue;
 	}
 
 	public static void setSensitivity(int sensitivity) {
 		SharedPreferences.Editor edit = prefs.edit();
 		edit.putInt(Settings.PREFS_SENSITIVITY, sensitivity);
 		edit.commit();
-		Settings.sensitivity = new Integer(sensitivity);
-		sensitivityValue = Settings.sensitivity.intValue();
+		Settings.sensitivity = sensitivity;
 	}
 
-	public static int getSensitivity() {
-		if (sensitivity == null) {
-			sensitivity = new Integer(prefs.getInt(Settings.PREFS_SENSITIVITY, 0));
-			sensitivityValue = sensitivity.intValue();
-		}
-		return sensitivityValue;
+	public static void setScrollSensitivity(int scrollSensitivity) {
+		SharedPreferences.Editor edit = prefs.edit();
+		edit.putInt(Settings.PREFS_SCROLL_SENSITIVITY, scrollSensitivity);
+		edit.commit();
+		Settings.scrollSensitivity = scrollSensitivity;
 	}
 
+	public static void setScrollInverted(boolean scrollInverted) {
+		SharedPreferences.Editor edit = prefs.edit();
+		edit.putBoolean(Settings.PREFS_SCROLL_INVERTED, scrollInverted);
+		edit.commit();
+		Settings.scrollInverted = scrollInverted;
+	}
+
+	
 }
-

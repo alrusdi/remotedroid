@@ -6,12 +6,6 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
-import com.joshsera.R;
-import com.joshsera.R.drawable;
-import com.joshsera.R.id;
-import com.joshsera.R.layout;
-import com.joshsera.R.string;
-
 import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
@@ -74,8 +68,8 @@ public class RemoteDroid extends Activity {
 
 		//
 		this.tbIp = (EditText)this.findViewById(R.id.etIp);
-		if (Settings.getIp() != null) {
-			this.tbIp.setText(Settings.getIp());
+		if (Settings.ip != null) {
+			this.tbIp.setText(Settings.ip);
 		}
 		//
 		if (this.dlHelp == null) {
@@ -86,7 +80,7 @@ public class RemoteDroid extends Activity {
 
 	private void populateHostList() {
 		// populates the host list with saved hosts from the settings
-		LinkedList<String> ips = Settings.getSavedHosts();
+		LinkedList<String> ips = Settings.savedHosts;
 		String[] from = new String[]{"hostip"};
 		int[] to = new int[]{R.id.hostEntry};
 		List<Map<String,String>> data = new ArrayList<Map<String, String>>();

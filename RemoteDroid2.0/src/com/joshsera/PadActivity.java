@@ -27,11 +27,6 @@ import android.widget.FrameLayout;
 import com.illposed.osc.OSCMessage;
 import com.illposed.osc.OSCPort;
 import com.illposed.osc.OSCPortOut;
-import com.joshsera.R;
-import com.joshsera.R.drawable;
-import com.joshsera.R.id;
-import com.joshsera.R.layout;
-import com.joshsera.R.string;
 
 /**
  * 
@@ -106,7 +101,22 @@ public class PadActivity extends Activity {
 	// private float scrollX = 0f;
 	private float scrollY = 0f;
 
-	static final float SCROLL_STEP = 12f;
+	/**
+	 * Mouse sensitivity power
+	 */
+	private double mMouseSensitivityPower;
+
+	private static final float sScrollStepMax = 6f;
+	private static final float sScrollStepMin = 45f;
+	private static final float sScrollMaxSettingsValue = 100f;
+
+	private float mScrollStep;// = 12f;
+	private static final float sTrackMultiplier = 6f;
+
+	/**
+	 * Cached multitouch information
+	 */
+	private boolean mIsMultitouchEnabled;
 
 	public PadActivity() {
 		super();
@@ -140,7 +150,9 @@ public class PadActivity extends Activity {
 		}
 	}
 
-	/* (non-Javadoc)
+	/*
+	 * (non-Javadoc)
+	 * 
 	 * @see android.app.Activity#onCreate(android.os.Bundle)
 	 */
 	public void onCreate(Bundle savedInstanceState) {
@@ -159,7 +171,7 @@ public class PadActivity extends Activity {
 					.getString(R.string.app_name));
 			// prepare sensor Listener
 			this.mSensorListener = new SensorEventListener() {
-				//@Override
+				// @Override
 				public void onSensorChanged(SensorEvent event) {
 					Sensor sensor = event.sensor;
 					int type = sensor.getType();
@@ -175,7 +187,7 @@ public class PadActivity extends Activity {
 					}
 				}
 
-				//@Override
+				// @Override
 				public void onAccuracyChanged(Sensor sensor, int accuracy) {
 					// no use for this
 				}
@@ -186,6 +198,20 @@ public class PadActivity extends Activity {
 				enableSensors();
 			}
 
+			/**
+			 * Caches information and forces WrappedMotionEvent class to load at
+			 * Activity startup (avoid initial lag on touchpad).
+			 */
+			this.mIsMultitouchEnabled = WrappedMotionEvent.isMutitouchCapable();
+
+			// Setup accelerations
+			mMouseSensitivityPower = 1 + ((double) Settings.sensitivity) / 100d;
+			mScrollStep = (sScrollStepMin - sScrollStepMax)
+					* (sScrollMaxSettingsValue - Settings.scrollSensitivity) / sScrollMaxSettingsValue
+					+ sScrollStepMax;
+
+			Log.d(TAG, "mScrollStep=" + mScrollStep);
+			Log.d(TAG, "Settings.sensitivity=" + Settings.scrollSensitivity);
 			//
 			this.accel = new Point3D();
 			this.mag = new Point3D();
@@ -233,7 +259,7 @@ public class PadActivity extends Activity {
 			DisplayMetrics dm = new DisplayMetrics();
 			this.getWindowManager().getDefaultDisplay().getMetrics(dm);
 			//
-			this.sender = new OSCPortOut(InetAddress.getByName(Settings.getIp()), OSCPort
+			this.sender = new OSCPortOut(InetAddress.getByName(Settings.ip), OSCPort
 					.defaultSCOSCPort());
 			//
 			this.initTouchpad();
@@ -330,7 +356,7 @@ public class PadActivity extends Activity {
 			return false;
 		}
 		//
-		//Log.d(TAG, "keydown "+String.valueOf(keycode));
+		// Log.d(TAG, "keydown "+String.valueOf(keycode));
 		Object[] args = new Object[3];
 		args[0] = 0; /* key down */
 		args[1] = keycode;
@@ -360,7 +386,7 @@ public class PadActivity extends Activity {
 			return false;
 		}
 		//
-		//Log.d(TAG, "keyup "+String.valueOf(keycode));
+		// Log.d(TAG, "keyup "+String.valueOf(keycode));
 		Object[] args = new Object[3];
 		args[0] = 1; /* key up */
 		args[1] = keycode;
@@ -407,25 +433,25 @@ public class PadActivity extends Activity {
 				Log.d(TAG, ex.toString());
 			}
 		}
-		if (Settings.getTrackAsScroll() == false) {
-			// use as mouse
-			float dir = ev.getRawX();
-			dir = dir == 0 ? 1 : dir / Math.abs(dir);
-			float xDir = (float) Math.pow(ev.getRawX() / 0.1666667, 3);
-			//
-			dir = ev.getRawY();
-			dir = dir == 0 ? 1 : dir / Math.abs(dir);
-			float yDir = (float) Math.pow(ev.getRawY() / 0.1666667, 3);
-			this.sendMouseEvent(2, xDir, yDir);
-			//
-		} else {
-			// use as scroll
-			float dir = ev.getRawY();
-			if (dir != 0) {
-				dir = -(dir / Math.abs(dir));
-				this.sendScrollEvent((int) dir);
-			}
-		}
+		// if (Settings.getTrackAsScroll() == false) {
+		// use as mouse
+		float dir = ev.getRawX();
+		dir = dir == 0 ? 1 : dir / Math.abs(dir);
+		float xDir = (float) Math.pow(sTrackMultiplier * ev.getRawX(), 3);
+		//
+		dir = ev.getRawY();
+		dir = dir == 0 ? 1 : dir / Math.abs(dir);
+		float yDir = (float) Math.pow(sTrackMultiplier * ev.getRawY(), 3);
+		this.sendMouseEvent(2, xDir, yDir);
+		//
+		// } else {
+		// // use as scroll
+		// float dir = ev.getRawY();
+		// if (dir != 0) {
+		// dir = -(dir / Math.abs(dir));
+		// this.sendScrollEvent((int) dir);
+		// }
+		// }
 		//
 		return true;
 	}
@@ -438,21 +464,22 @@ public class PadActivity extends Activity {
 		float yMove = 0f;
 
 		int pointerCount = 1;
-		if (WrappedMotionEvent.isMutitouchCapable()) {
+		if (mIsMultitouchEnabled) {
 			pointerCount = WrappedMotionEvent.getPointerCount(ev);
 		}
 
-//		for (int i = 0; i < pointerCount; i++) {
-//			int pointerId = ev.getPointerId(i);
-//
-//			Log.v(TAG, "[Id=" + i + " - Index=" + i + "] X=" + ev.getX(pointerId) + " Y="
-//					+ ev.getY(pointerId) + " Pressure=" + ev.getPressure(pointerId));
-//		}
+		// for (int i = 0; i < pointerCount; i++) {
+		// int pointerId = ev.getPointerId(i);
+		//
+		// Log.v(TAG, "[Id=" + i + " - Index=" + i + "] X=" + ev.getX(pointerId)
+		// + " Y="
+		// + ev.getY(pointerId) + " Pressure=" + ev.getPressure(pointerId));
+		// }
 
 		switch (ev.getAction()) {
 		case MotionEvent.ACTION_DOWN:
 			//
-			if (Settings.getTapToClick() && (pointerCount == 1)) {
+			if (Settings.tapToClick && (pointerCount == 1)) {
 				if (this.tapState == TAP_NONE) {
 					// first tap
 					this.lastTap = System.currentTimeMillis();
@@ -478,11 +505,11 @@ public class PadActivity extends Activity {
 			//
 			break;
 		case MotionEvent.ACTION_UP:
-			if (Settings.getTapToClick() && (pointerCount == 1)) {
+			if (Settings.tapToClick && (pointerCount == 1)) {
 				// it's a tap!
 				long now = System.currentTimeMillis();
 				long elapsed = now - this.lastTap;
-				if (elapsed <= Settings.getClickTime()) {
+				if (elapsed <= Settings.clickTime) {
 					if (this.tapState == TAP_NONE) {
 						// send the mouse down event
 						this.lastTap = now;
@@ -492,7 +519,7 @@ public class PadActivity extends Activity {
 							public void run() {
 								firstTapUp();
 							}
-						}, 0, Settings.getClickTime());
+						}, 0, Settings.clickTime);
 
 					} else if (this.tapState == TAP_SECOND) {
 						// double-click
@@ -537,29 +564,29 @@ public class PadActivity extends Activity {
 				int pointer0 = WrappedMotionEvent.getPointerId(ev, 0);
 				int pointer1 = WrappedMotionEvent.getPointerId(ev, 1);
 
-				float posX = WrappedMotionEvent.getX(ev, pointer0);
+				// float posX = WrappedMotionEvent.getX(ev, pointer0);
 				float posY = WrappedMotionEvent.getY(ev, pointer0);
 
 				// only consider the second pointer if I had a previous history
 				if (lastPointerCount == 2) {
-					posX += WrappedMotionEvent.getX(ev, pointer1);
-					posX /= 2;
+					// posX += WrappedMotionEvent.getX(ev, pointer1);
+					// posX /= 2;
 					posY += WrappedMotionEvent.getY(ev, pointer1);
 					posY /= 2;
 
-					xMove = posX - this.xHistory;
+					// xMove = posX - this.xHistory;
 					yMove = posY - this.yHistory;
 				} else {
-					xMove = posX - this.xHistory;
+					// xMove = posX - this.xHistory;
 					yMove = posY - this.yHistory;
 
-					posX += WrappedMotionEvent.getX(ev, pointer1);
-					posX /= 2;
+					// posX += WrappedMotionEvent.getX(ev, pointer1);
+					// posX /= 2;
 					posY += WrappedMotionEvent.getY(ev, pointer1);
 					posY /= 2;
 				}
 
-				this.xHistory = posX;
+				// this.xHistory = posX;
 				this.yHistory = posY;
 			}
 			break;
@@ -572,12 +599,17 @@ public class PadActivity extends Activity {
 			// // can't deal with X scrolling yet
 			// scrollX = 0f;
 			// }
-			if (Math.abs(scrollY) > SCROLL_STEP) {
+			if (Math.abs(scrollY) > mScrollStep) {
 				if (scrollY > 0f) {
-					dir = -1;
-				} else {
 					dir = 1;
+				} else {
+					dir = -1;
 				}
+				
+				if (Settings.scrollInverted) {
+					dir = -dir;
+				}
+				
 				scrollY = 0f;
 			}
 			this.sendScrollEvent(dir);
@@ -669,10 +701,8 @@ public class PadActivity extends Activity {
 		//
 		Object[] args = new Object[3];
 		args[0] = type;
-		args[1] = (float) (Math.pow(Math.abs(x), 1 + ((double) Settings.getSensitivity()) / 100d))
-				* xDir;
-		args[2] = (float) (Math.pow(Math.abs(y), 1 + ((double) Settings.getSensitivity()) / 100d))
-				* yDir;
+		args[1] = (float) (Math.pow(Math.abs(x), mMouseSensitivityPower)) * xDir;
+		args[2] = (float) (Math.pow(Math.abs(y), mMouseSensitivityPower)) * yDir;
 		// Log.d(TAG, String.valueOf(Settings.getSensitivity()));
 		//
 		OSCMessage msg = new OSCMessage("/mouse", args);
@@ -735,7 +765,7 @@ public class PadActivity extends Activity {
 	 * @param ev
 	 */
 	private void moveMouseWithSecondFinger(MotionEvent ev) {
-		if (! WrappedMotionEvent.isMutitouchCapable()) {
+		if (!mIsMultitouchEnabled) {
 			return;
 		}
 		int pointerCount = WrappedMotionEvent.getPointerCount(ev);

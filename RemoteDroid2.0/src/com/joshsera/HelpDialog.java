@@ -1,15 +1,10 @@
 package com.joshsera;
 
-import com.joshsera.R;
-import com.joshsera.R.id;
-import com.joshsera.R.layout;
-import com.joshsera.R.string;
-
-import android.app.*;
-import android.content.*;
-import android.os.*;
+import android.app.Dialog;
+import android.content.Context;
+import android.os.Bundle;
 import android.view.View;
-import android.widget.*;
+import android.widget.Button;
 
 public class HelpDialog extends Dialog {
 	
