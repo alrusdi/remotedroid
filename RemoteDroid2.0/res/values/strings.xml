@@ -17,6 +17,8 @@
 <string name="txt_server_url">http://www.remotedroid.net/</string>
 <string name="txt_help_dialog_1">Once you have downloaded, installed and launched the RemoteDroid application on your computer, it will display your IP address.  Enter this IP address on your phone to connect it to your computer.</string>
 <string name="txt_preferences">Preferences</string>
+<string name="txt_keyboard">Keyboard</string>
+<string name="txt_advanced">Controls</string>
 <string name="txt_save">Save</string>
 <string name="txt_prefs_copy">Tap the menu button for preferences or help.</string>
 

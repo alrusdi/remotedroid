@@ -16,6 +16,9 @@ public class Settings {
 	public static int scrollSensitivity;
 	public static boolean scrollInverted;
 	// public static boolean trackValue;
+	public static boolean hideMouseButtons;
+	public static boolean twoTouchRightClick;
+	public static boolean hideAdvancedControls;
 
 	//
 	private static SharedPreferences prefs;
@@ -28,6 +31,11 @@ public class Settings {
 	private static final String PREFS_RECENT_IP_PREFIX = "recenthost";
 	private static final String PREFS_SCROLL_SENSITIVITY = "scrollSensitivity";
 	private static final String PREFS_SCROLL_INVERTED = "scrollInverted";
+	//
+	private static final String PREFS_MULTITOUCH_RIGHTCLICK = "twoTouchRightClick";
+	private static final String PREFS_ADVANCED_CONTROLS = "showAdvancedControls";
+	private static final String PREFS_MOUSE_BUTTONS = "showMouseButtons";
+	
 	//
 	private static final String PREFS_FILENAME = "RemoteDroid";
 	// number of hosts to save in the history
@@ -57,7 +65,11 @@ public class Settings {
 			// trackAsScroll = new Boolean(prefs.getBoolean(PREFS_TRACKASSCROLL,
 			// false));
 			// trackValue = trackAsScroll.booleanValue();
-
+			
+			hideAdvancedControls = prefs.getBoolean(PREFS_ADVANCED_CONTROLS, false);
+			twoTouchRightClick = prefs.getBoolean(PREFS_MULTITOUCH_RIGHTCLICK, true);
+			hideMouseButtons = prefs.getBoolean(PREFS_MOUSE_BUTTONS, true);
+			
 		}
 	}
 
@@ -182,6 +194,26 @@ public class Settings {
 		edit.commit();
 		Settings.scrollInverted = scrollInverted;
 	}
-
+	
+	public static void setTwoTouchRightClick(boolean twoTouchRightClick) {
+		SharedPreferences.Editor edit = prefs.edit();
+		edit.putBoolean(Settings.PREFS_MULTITOUCH_RIGHTCLICK, twoTouchRightClick);
+		edit.commit();
+		Settings.twoTouchRightClick = twoTouchRightClick;
+	}
+	
+	public static void setShowMouseButtons(boolean showMouseButtons) {
+		SharedPreferences.Editor edit = prefs.edit();
+		edit.putBoolean(Settings.PREFS_MOUSE_BUTTONS, showMouseButtons);
+		edit.commit();
+		Settings.hideMouseButtons = showMouseButtons;
+	}
+	
+	public static void setShowAdvancedControls(boolean showAdvancedControls) {
+		SharedPreferences.Editor edit = prefs.edit();
+		edit.putBoolean(Settings.PREFS_ADVANCED_CONTROLS, showAdvancedControls);
+		edit.commit();
+		Settings.hideAdvancedControls = showAdvancedControls;
+	}
 	
 }

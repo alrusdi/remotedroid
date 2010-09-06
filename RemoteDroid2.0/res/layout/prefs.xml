@@ -23,6 +23,23 @@
 				android:layout_gravity="left" android:textSize="16dp" android:id="@+id/cbTap"
 				android:focusable="true"></CheckBox>
 
+			<TextView android:id="@+id/TextView06" android:layout_width="wrap_content"
+				android:layout_height="wrap_content" android:layout_gravity="left"
+				android:textColor="#FFF" android:text="Two-Finger Right Click"
+				android:textSize="16dp"></TextView>
+			<CheckBox android:layout_width="wrap_content"
+				android:layout_height="wrap_content" android:text="Enabled"
+				android:layout_gravity="left" android:textSize="16dp" android:id="@+id/cbTwoTouch"
+				android:focusable="true"></CheckBox>
+			<TextView android:id="@+id/TextView07" android:layout_width="wrap_content"
+				android:layout_height="wrap_content" android:layout_gravity="left"
+				android:textColor="#FFF" android:text="On-screen Mouse Buttons"
+				android:textSize="16dp"></TextView>
+			<CheckBox android:layout_width="wrap_content"
+				android:layout_height="wrap_content" android:text="Enabled"
+				android:layout_gravity="left" android:textSize="16dp" android:id="@+id/cbShowButtons"
+				android:focusable="true"></CheckBox>
+				
 			<TextView android:id="@+id/TextView02" android:layout_width="wrap_content"
 				android:layout_height="wrap_content" android:textSize="16dp"
 				android:text="Tap speed" android:textColor="#FFF"></TextView>

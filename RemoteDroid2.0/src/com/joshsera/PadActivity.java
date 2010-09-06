@@ -1,12 +1,16 @@
 package com.joshsera;
 
 import java.net.InetAddress;
+import java.util.ArrayList;
 import java.util.Timer;
 import java.util.TimerTask;
 
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
+import android.graphics.Bitmap;
+import android.graphics.Color;
+import android.graphics.Bitmap.Config;
 import android.hardware.Sensor;
 import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
@@ -14,19 +18,30 @@ import android.hardware.SensorManager;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.PowerManager;
+import android.text.Editable;
+import android.text.TextWatcher;
 import android.util.DisplayMetrics;
 import android.util.Log;
 import android.view.KeyEvent;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.Window;
 import android.view.WindowManager;
+import android.view.View.OnKeyListener;
+import android.view.ViewGroup.LayoutParams;
+import android.view.inputmethod.EditorInfo;
 import android.view.inputmethod.InputMethodManager;
+import android.widget.EditText;
 import android.widget.FrameLayout;
+import android.widget.ImageButton;
+import android.widget.LinearLayout;
 
 import com.illposed.osc.OSCMessage;
 import com.illposed.osc.OSCPort;
 import com.illposed.osc.OSCPortOut;
+import com.joshsera.PadActivity.PanelConfig.PanelItem;
 
 /**
  * 
@@ -48,6 +63,7 @@ public class PadActivity extends Activity {
 	private static final int TAP_SECOND = 2;
 	private static final int TAP_DOUBLE = 3;
 	private static final int TAP_DOUBLE_FINISH = 4;
+	private static final int TAP_RIGHT = 5;
 	private static final String TAG = "RemoteDroid";
 
 	//
@@ -69,6 +85,281 @@ public class PadActivity extends Activity {
 	private boolean softShown = false;
 	private Runnable rMidDown;
 	private Runnable rMidUp;
+	//
+
+	private EditText etAdvancedText;
+	//
+	private FrameLayout flAdvancedPanel;
+	private int advancedPanelHeight = 72;
+	private String advancedPanelConfig = "Play{icon:bitblt_halpha16('" +
+			"0000000000FF00000000000000000000" +
+			"0000000000FFFF000000000000000000" +
+			"0000000000FFFFFF0000000000000000" +
+			"0000000000FFFFFFFF00000000000000" +
+			"0000000000FFFFFFFFFF000000000000" +
+			"0000000000FFFFFFFFFFFF0000000000" +
+			"0000000000FFFFFFFFFFFFFF00000000" +
+			"0000000000FFFFFFFFFFFFFFFF000000" +
+			"0000000000FFFFFFFFFFFFFF77000000" +
+			"0000000000FFFFFFFFFFFF7733000000" +
+			"0000000000FFFFFFFFFF773300000000" +
+			"0000000000FFFFFFFF77330000000000" +
+			"0000000000FFFFFF7733000000000000" +
+			"0000000000FFFF773300000000000000" +
+			"0000000000FF77330000000000000000" +
+			"00000000007733000000000000000000');" +
+			"command:key_code(162,162,162);" +
+			"}\r\n" +
+			"Next{icon:bitblt_halpha16('" +
+			"0000BBFF0000FF000000000000000000" +
+			"0000BBFF5500FFFF0000000000000000" +
+			"0000BBFF5500FFFFFF00000000000000" +
+			"0000BBFF5500FFFFFFFF000000000000" +
+			"0000BBFF5500FFFFFFFFFF0000000000" +
+			"0000BBFF5500FFFFFFFFFFFF00000000" +
+			"0000BBFF5500FFFFFFFFFFFFFF000000" +
+			"0000BBFF5500FFFFFFFFFFFFFFFF0000" +
+			"0000BBFF5500FFFFFFFFFFFFFF770000" +
+			"0000BBFF5500FFFFFFFFFFFF77330000" +
+			"0000BBFF5500FFFFFFFFFF7733000000" +
+			"0000BBFF5500FFFFFFFF773300000000" +
+			"0000BBFF5500FFFFFF77330000000000" +
+			"0000BBFF5500FFFF7733000000000000" +
+			"0000BBFF5500FF773300000000000000" +
+			"00000033550077330000000000000000');" +
+			"command:key_code(162,162,162);" +
+			"}" +
+			"Ctrl{icon:bitblt_halpha16('" +
+			"0000BBFF0000FF000000000000000000" +
+			"0000BBFF5500FFFF0000000000000000" +
+			"0000BBFF5500FFFFFF00000000000000" +
+			"0000BBFF5500FFFFFFFF000000000000" +
+			"0000BBFF5500FFFFFFFFFF0000000000" +
+			"0000BBFF5500FFFFFFFFFFFF00000000" +
+			"0000BBFF5500FFFFFFFFFFFFFF000000" +
+			"0000BBFF5500FFFFFFFFFFFFFFFF0000" +
+			"0000BBFF5500FFFFFFFFFFFFFF770000" +
+			"0000BBFF5500FFFFFFFFFFFF77330000" +
+			"0000BBFF5500FFFFFFFFFF7733000000" +
+			"0000BBFF5500FFFFFFFF773300000000" +
+			"0000BBFF5500FFFFFF77330000000000" +
+			"0000BBFF5500FFFF7733000000000000" +
+			"0000BBFF5500FF773300000000000000" +
+			"00000033550077330000000000000000');" +
+			"command:key_code(162,162,162);" +
+			"}";
+	
+	public class PanelConfig
+	{
+		
+		ArrayList<PanelItem> PanelItems = new ArrayList<PanelItem>();
+		
+		public PanelConfig(String config)
+		{
+			int level = 0;
+			String current = "";
+			for (int i = 0; i < config.length(); i++)
+			{
+				String chr = config.substring(i, i+1);
+
+				current += chr;
+				if (chr.equals("{"))
+				{
+					if (level == 0) current = current.trim();
+					level++;
+				}
+				if (chr.equals("}"))
+				{
+					level--;
+
+					if (level == 0)
+					{
+						PanelItems.add(new PanelItem(current));
+						current = "";
+					}
+				}
+			}
+		}
+	
+		public class PanelItem
+		{
+			public String Name = "";
+			Bitmap icon = null;
+			PanelCommand command = null;
+			public PanelItem(String config)
+			{
+				boolean isBefore = true;
+				String current = "";
+				String name = "";
+				String value = "";
+				for (int i = 0; i < config.length(); i++)
+				{
+					String chr = config.substring(i, i + 1);
+					if (isBefore)
+					{
+						if (chr.equals("{"))
+						{
+							current = current.trim();
+							Name = current;
+
+							current = "";
+							isBefore = false;
+						}
+						else
+						{
+							current += chr;
+						}
+					}
+					else
+					{
+						if (chr.equals(":"))
+						{
+							name = current.trim().toLowerCase();
+							current = "";
+						}
+						else if (chr.equals("}") || chr.equals(";"))
+						{
+							if (!name.equals(""))
+							{
+								value = current.trim();
+								current = "";
+								
+								if(name.equals("icon"))
+								{
+									icon = parseBitmap(value);
+								}
+								if(name.equals("command"))
+								{
+									command = parseCommand(value);
+								}
+								if(name.equals("name"))
+								{
+									Name = parseString(value);
+								}
+								
+								name = "";
+							}
+						}
+						else
+						{
+							current += chr;
+						}
+					}
+				}
+			}
+			
+			public String parseString(String value)
+			{
+				return value.trim().replace("'", "");
+			}
+
+			public Bitmap parseBitmap(String value)
+			{
+				value = value.trim();
+				
+				if(value.startsWith("bitblt_halpha16("))
+				{
+					String bb = "";
+					for (int i = 16; i < value.length(); i++)
+					{
+						String chr = value.substring(i, i + 1);
+						if ("0123456789ABCDEFabcdef".contains(chr)) bb += chr;
+					}
+					
+					if(bb.length()<16*16*2) return Bitmap.createBitmap(16, 16, Config.ARGB_8888);
+					
+					Bitmap bmp = Bitmap.createBitmap(16, 16, Config.ARGB_8888);
+					int ix=0;
+					for (int y = 0; y < 16; y++)
+					{
+						for (int x = 0; x < 16; x++)
+						{
+							String hex_pair = bb.substring(ix,ix+2); ix+=2;
+							bmp.setPixel(x, y, Color.argb(Integer.valueOf(hex_pair, 16).intValue(), 0, 0, 0));
+						}
+					}
+					return bmp;					
+				}if(value.startsWith("bitblt_halpha32("))
+				{
+					String bb = "";
+					for (int i = 16; i < value.length(); i++)
+					{
+						String chr = value.substring(i, i + 1);
+						if ("0123456789ABCDEFabcdef".contains(chr)) bb += chr;
+					}
+					
+					if(bb.length()<32*32*2) return Bitmap.createBitmap(16, 16, Config.ARGB_8888);
+					Bitmap bmp = Bitmap.createBitmap(32, 32, Config.ARGB_8888);
+					int ix=0;
+					for (int y = 0; y < 32; y++)
+					{
+						for (int x = 0; x < 32; x++)
+						{
+							String hex_pair = bb.substring(ix,ix+2); ix+=2;
+							bmp.setPixel(x, y, Color.argb(Integer.valueOf(hex_pair, 16).intValue(), 0, 0, 0));
+						}
+					}
+					return bmp;					
+				}
+				if(value.startsWith("bitblt_halpha48("))
+				{
+					String bb = "";
+					for (int i = 16; i < value.length(); i++)
+					{
+						String chr = value.substring(i, i + 1);
+						if ("0123456789ABCDEFabcdef".contains(chr)) bb += chr;
+					}
+					
+					if(bb.length()<48*48*2) return Bitmap.createBitmap(16, 16, Config.ARGB_8888);
+					Bitmap bmp = Bitmap.createBitmap(48, 48, Config.ARGB_8888);
+					int ix=0;
+					for (int y = 0; y < 48; y++)
+					{
+						for (int x = 0; x < 48; x++)
+						{
+							String hex_pair = bb.substring(ix,ix+2); ix+=2;
+							bmp.setPixel(x, y, Color.argb(Integer.valueOf(hex_pair, 16).intValue(), 0, 0, 0));
+						}
+					}
+					return bmp;					
+				}
+				if(value.startsWith("bitblt_halpha64("))
+				{
+					String bb = "";
+					for (int i = 16; i < value.length(); i++)
+					{
+						String chr = value.substring(i, i + 1);
+						if ("0123456789ABCDEFabcdef".contains(chr)) bb += chr;
+					}
+					
+					if(bb.length()<48*48*2) return Bitmap.createBitmap(16, 16, Config.ARGB_8888);
+					Bitmap bmp = Bitmap.createBitmap(64, 64, Config.ARGB_8888);
+					int ix=0;
+					for (int y = 0; y < 64; y++)
+					{
+						for (int x = 0; x < 64; x++)
+						{
+							String hex_pair = bb.substring(ix,ix+2); ix+=2;
+							bmp.setPixel(x, y, Color.argb(Integer.valueOf(hex_pair, 16).intValue(), 0, 0, 0));
+						}
+					}
+					return bmp;					
+				}
+				return Bitmap.createBitmap(16, 16, Config.ARGB_8888);
+			}
+
+			public class PanelCommand
+			{
+				public String Windows = "";
+				public String Linux = "";
+				public String OSX = "";
+			}
+			public PanelCommand parseCommand(String value)
+			{
+				return null;
+			}
+		}
+	}
 	//
 	private float xHistory;
 	private float yHistory;
@@ -266,15 +557,514 @@ public class PadActivity extends Activity {
 			this.initLeftButton();
 			this.initRightButton();
 			this.initMidButton();
+			this.initAdvancedPanel();
+			this.initAdvancedText();
 		} catch (Exception ex) {
 			Log.d(TAG, ex.toString());
 		}
 	}
 
+	public boolean onCreateOptionsMenu(Menu menu) {
+		super.onCreateOptionsMenu(menu);
+		//
+		menu.add(0, 1, 0, R.string.txt_advanced).setShortcut('0', 'c').setIcon(R.drawable.icon_advanced);
+		menu.add(0, 2, 0, R.string.txt_keyboard).setShortcut('1', 'k').setIcon(R.drawable.icon_keyboard);
+		menu.add(0, 3, 0, R.string.txt_help).setShortcut('2', 'h').setIcon(R.drawable.icon_help);
+		//
+		return true;
+	}
+
+	public boolean onOptionsItemSelected(MenuItem item) {
+		//
+		switch (item.getItemId()) {
+		case 1:
+			//
+			onAdvancedToggle();
+			break;
+		case 2:
+			//
+			midButtonDown();
+			break;
+		case 3:
+			//
+			//onPrefs();
+			break;
+		}
+		//
+		return super.onOptionsItemSelected(item);
+	}
+	
+	private void onAdvancedToggle() {
+		
+		if(flAdvancedPanel.getHeight()<10){
+			android.view.ViewGroup.LayoutParams lp = flAdvancedPanel
+					.getLayoutParams();
+			lp.height = advancedPanelHeight;
+			flAdvancedPanel.setLayoutParams(lp);
+
+			
+			
+			LinearLayout ll = (LinearLayout) this.findViewById(R.id.llAdvancedGroup);
+
+			ll.removeAllViewsInLayout();
+			
+			PanelConfig pc = new PanelConfig(advancedPanelConfig);
+			for (PanelItem item : pc.PanelItems)
+			{
+				Bitmap bd = Bitmap.createScaledBitmap(item.icon, 48, 48, true);
+				ImageButton ib = new ImageButton(getApplicationContext());
+				ib.setImageBitmap(bd);
+				ll.addView(ib,72,72);
+			}
+
+		}else{
+			android.view.ViewGroup.LayoutParams lp = flAdvancedPanel.getLayoutParams();
+			lp.height=0;
+			flAdvancedPanel.setLayoutParams(lp);
+		}
+	}
+
+	@SuppressWarnings("unused")
+	private void onPrefs() {
+		Intent i = new Intent(PadActivity.this, PrefsActivity.class);
+		this.startActivity(i);
+	}
+	
+	
+	
+	private void initAdvancedPanel() {
+		FrameLayout fl = (FrameLayout) this.findViewById(R.id.flAdvancedPanel);
+		//advancedPanelHeight = fl.getMeasuredHeight();
+		//advancedPanelHeight = fl.getHeight();
+		LayoutParams lp = fl.getLayoutParams();
+		//advancedPanelHeight = lp.height*1;
+		lp.height=0;
+		fl.setLayoutParams(lp);
+		// listener
+		//fl.setOnTouchListener(new View.OnTouchListener() {
+		//	public boolean onTouch(View v, MotionEvent ev) {
+		//		return onAdvancedTouch(ev);
+		//	}
+		//});
+		this.flAdvancedPanel = fl;
+	}
+
+	private void sendKey(int keycode)
+	{
+		
+		Log.d("SEND_KEY", keycode + " '" + new Character(
+				Character.toChars(Settings.charmap.get(keycode, 0))[0]).toString()+"'");
+		try
+		{
+			{
+				Object[] args = new Object[3];
+				args[0] = 0; /* key down */
+				args[1] = keycode;// (int)c;
+				args[2] = new Character(
+						Character.toChars(Settings.charmap.get(keycode, 0))[0]).toString();
+				OSCMessage msg = new OSCMessage("/keyboard", args);
+
+				this.sender.send(msg);
+
+			}
+			{
+				Object[] args = new Object[3];
+				args[0] = 1; /* key down */
+				args[1] = keycode;// (int)c;
+				args[2] = new Character(
+						Character.toChars(Settings.charmap.get(keycode, 0))[0]).toString();
+				OSCMessage msg = new OSCMessage("/keyboard", args);
+
+				this.sender.send(msg);
+
+			}
+		}
+		catch (Exception ex)
+		{
+			Log.d(TAG, ex.toString());
+		}
+	}
+	
+	
+	
+	int find = 0;
+	
+	private void sendKeys(String keys)
+	{
+		if(keys.equals("a  ")) return;
+		/*
+		 	shift,ctrl,alt
+			
+			
+			"(",16,true,false,false
+			")",7,true,false,false
+			
+			"{",71,true,false,false
+		!!! "}",38,true,false,false
+			
+			"#",18
+			"*",17
+			"\n",66
+			" ",62
+			"+",81
+			"-",69
+			"&",14,true,false,false
+			",",55
+			";",74
+			";",74,true,false,false
+			"/",76
+			"@",77
+			"'",75
+			"\"",75,true,false,false
+			"!",8,true,false,false
+			"?",72,false,false,false
+			
+			"~",126,true,false,false
+			"_",95,true,false,false
+			"^",94,true,false,false
+			"%",12,true,false,false
+			"=",70
+			"$",11,true,false,false
+		*/
+		
+		for (int i = 0; i < keys.length(); i++)
+		{
+			String c = keys.substring(i, i + 1);
+
+			boolean isShift = false;
+			boolean isCtrl = false;
+			
+			if(!c.toLowerCase().equals(c))
+			{
+				isShift = true;
+				c = c.toLowerCase();
+			}
+			
+			int key = 0;
+
+			if(c.equals(" "))
+				key = 62;
+			if(c.equals("\n"))
+				key = 66;
+			if(c.equals("\t"))
+			{
+				key = 45;
+				isCtrl = true;
+			}
+			
+
+			if (c.equals("_"))
+			{
+				key = 95;
+				isShift = true;
+			}
+			if (c.equals("\""))
+			{
+				key = 75;
+				isShift = true;
+			}
+			if (c.equals("^"))
+			{
+				key = 94;
+				isShift = true;
+			}
+			if (c.equals("~"))
+			{
+				key = 126;
+				isShift = true;
+			}
+			if (c.equals("`"))
+			{
+				key = 68;
+				isShift = true;
+			}
+			if (c.equals(":"))
+			{
+				key = 74;
+				isShift = true;
+			}
+			if (c.equals("="))
+				key = 70;
+			if (c.equals("+"))
+			{
+				key = 70;
+				isShift=true;
+			}
+			if (c.equals("%"))
+			{
+				key = 12;
+				isShift=true;
+			}
+			if (c.equals("&"))
+			{
+				key = 14;
+				isShift=true;
+			}
+			if (c.equals("^"))
+			{
+				key = 13;
+				isShift=true;
+			}
+			if (c.equals("|"))
+			{
+				key = 73;
+				isShift=true;
+			}
+			if (c.equals("_"))
+			{
+				key = 69;
+				isShift=true;
+			}
+			if (c.equals("?"))
+			{
+				key = 76;
+				isShift=true;
+			}
+			
+			if (c.equals("!"))
+			{
+				key = 8;
+				isShift=true;				
+			}
+			if (c.equals("$"))
+			{
+				key = 11;
+				isShift=true;				
+			}
+			
+			if (c.equals("~"))
+			{
+				key = 68;
+				isShift=true;				
+			}
+
+			if (c.equals("<"))
+			{
+				key = 55;
+				isShift=true;				
+			}
+			if (c.equals(">"))
+			{
+				key = 56;
+				isShift=true;				
+			}
+			
+
+			if (c.equals(""))
+			{
+				key = 56;
+				isCtrl=true;				
+			}
+			
+			/* for testing key codes ONLY
+			if (c.equals("z"))
+			{
+				key = find++;
+				isCtrl=true;
+				isShift = true;
+				Log.d("KEY_TEST", "'" + c + "' " + key + (isShift?" [59]":"") + (isCtrl?" [57]":""));
+			}
+			if (c.equals("x"))
+			{
+				key = find--;
+				isCtrl=true;
+				isShift = true;
+				Log.d("KEY_TEST", "'" + c + "' " + key + (isShift?" [59]":"") + (isCtrl?" [57]":""));
+			}
+			*/
+			
+			
+			if (c.equals("("))
+			{
+				key = 16;
+				isShift = true;
+			}
+			if (c.equals(")"))
+			{
+				key = 7;
+				isShift = true;
+			}
+			
+			if (c.equals("{"))
+			{
+				key = 71;
+				isShift = true;
+			}
+			if (c.equals("}"))
+			{
+				key = 72;
+				isShift = true;
+			}
+			if (c.equals("["))
+				key = 71;
+			if (c.equals("]"))
+				key = 72;
+
+			if (key == 0)
+				for (int z = 0; z < 1024; z++)
+				{
+					if (Settings.charmap.isPrintingKey(z))
+					{
+						if (new Character(Character.toChars(Settings.charmap
+								.get(z, 0))[0]).toString().equals(c))
+						{
+							key = z;
+							break;
+						}
+					}
+				}
+
+			try
+			{	
+				if(isCtrl){
+					Object[] args = new Object[3];
+					args[0] = 0; /* key down */
+					args[1] = 57;// (int)c;
+					args[2] = new Character((char)0).toString();
+					OSCMessage msg = new OSCMessage("/keyboard", args);
+
+					this.sender.send(msg);
+				}
+				
+				if(isShift){
+					Object[] args = new Object[3];
+					args[0] = 0; /* key down */
+					args[1] = 59;// (int)c;
+					args[2] = new Character((char)0).toString();
+					OSCMessage msg = new OSCMessage("/keyboard", args);
+
+					this.sender.send(msg);
+				}
+				
+				{
+					Object[] args = new Object[3];
+					args[0] = 0; /* key down */
+					args[1] = key;// (int)c;
+					args[2] = c;
+					OSCMessage msg = new OSCMessage("/keyboard", args);
+
+					this.sender.send(msg);
+
+				}
+				{
+					Object[] args = new Object[3];
+					args[0] = 1; /* key up */
+					args[1] = key;// (int)c;
+					args[2] = c;
+					OSCMessage msg = new OSCMessage("/keyboard", args);
+
+					this.sender.send(msg);
+
+				}
+				if(isShift){
+					Object[] args = new Object[3];
+					args[0] = 1; /* key up */
+					args[1] = 59;// (int)c;
+					args[2] = new Character((char)0).toString();
+					OSCMessage msg = new OSCMessage("/keyboard", args);
+
+					this.sender.send(msg);
+				}
+				
+				if(isCtrl){
+					Object[] args = new Object[3];
+					args[0] = 1; /* key up */
+					args[1] = 57;// (int)c;
+					args[2] = new Character((char)0).toString();
+					OSCMessage msg = new OSCMessage("/keyboard", args);
+
+					this.sender.send(msg);
+				}
+			}
+			catch (Exception ex)
+			{
+				Log.d(TAG, ex.toString());
+			}
+		}
+		
+	}
+	
+	String changed = "";
+	private void initAdvancedText() {
+		EditText et = (EditText) this.findViewById(R.id.etAdvancedText);
+		this.etAdvancedText = et;
+		
+		et.setImeOptions(EditorInfo.IME_FLAG_NO_EXTRACT_UI);//make sure keyboard doesnt go fullscreen in landscape mode
+
+		changed = "a  ";
+		etAdvancedText.setText(changed);
+		
+		// listener
+		et.setOnKeyListener(new OnKeyListener(){
+
+				@Override
+				public boolean onKey(View v, int keyCode, KeyEvent event)
+				{
+					Log.d("KEY_CHANGED", "'" + event.getCharacters() + "' "
+							+ keyCode);
+					changed = "a  ";
+					etAdvancedText.setText(changed);
+					return false;
+				}
+
+			});
+		et.addTextChangedListener(new TextWatcher(){
+			public void onTextChanged(CharSequence s, int start, int before,
+					int count)
+			{
+					if (s.toString().equals(changed))
+					{
+
+						etAdvancedText.requestFocus();
+						etAdvancedText.setSelection(2);
+						return;
+					}
+					changed = null;
+
+					// onAdvancedTextChanged(s, start, count);
+					Log.d("TEXT_CHANGED",
+							"'" + s.toString().substring(start, start + count)
+									+ "' " + start + "|" + count);
+					String change = s.toString().substring(start, start + count);
+					
+					if (count != 0)
+					{
+						if (change.equals(" "))
+						{
+							sendKey(62);
+						}
+						else
+						{
+							sendKeys(change);
+						}
+					}
+					else
+					{
+						sendKey(67);
+					}
+
+					changed = "a  ";
+					etAdvancedText.setText(changed);
+			}
+			
+			public void afterTextChanged(Editable s)
+			{
+				
+			}
+			public void beforeTextChanged(CharSequence s, int start, int count, int after)
+			{
+				
+			}
+		});
+	}
+	
+	
+	
+	
 	private void initTouchpad() {
 		FrameLayout fl = (FrameLayout) this.findViewById(R.id.flTouchPad);
 
-		// let's set up a touch thinger
+		// let's set up a touch listener
 		fl.setOnTouchListener(new View.OnTouchListener() {
 			public boolean onTouch(View v, MotionEvent ev) {
 				return onMouseMove(ev);
@@ -284,6 +1074,9 @@ public class PadActivity extends Activity {
 
 	private void initLeftButton() {
 		FrameLayout fl = (FrameLayout) this.findViewById(R.id.flLeftButton);
+		android.view.ViewGroup.LayoutParams lp = fl.getLayoutParams();
+		if(!Settings.hideMouseButtons) lp.height=0;
+		fl.setLayoutParams(lp);
 		// listener
 		fl.setOnTouchListener(new View.OnTouchListener() {
 			public boolean onTouch(View v, MotionEvent ev) {
@@ -295,6 +1088,9 @@ public class PadActivity extends Activity {
 
 	private void initRightButton() {
 		FrameLayout iv = (FrameLayout) this.findViewById(R.id.flRightButton);
+		android.view.ViewGroup.LayoutParams lp = iv.getLayoutParams();
+		if(!Settings.hideMouseButtons) lp.height=0;
+		iv.setLayoutParams(lp);
 		// listener
 		iv.setOnTouchListener(new View.OnTouchListener() {
 			public boolean onTouch(View v, MotionEvent ev) {
@@ -306,6 +1102,9 @@ public class PadActivity extends Activity {
 
 	private void initMidButton() {
 		FrameLayout fl = (FrameLayout) this.findViewById(R.id.flKeyboardButton);
+		android.view.ViewGroup.LayoutParams lp = fl.getLayoutParams();
+		if(!Settings.hideMouseButtons) lp.height=0;
+		fl.setLayoutParams(lp);
 		// listener
 		fl.setOnTouchListener(new View.OnTouchListener() {
 			public boolean onTouch(View v, MotionEvent ev) {
@@ -351,6 +1150,9 @@ public class PadActivity extends Activity {
 	// keyboard
 
 	public boolean onKeyDown(int keycode, KeyEvent ev) {
+		//allow menu to show
+		//if (keycode == KeyEvent.KEYCODE_MENU)
+		//	return super.onKeyDown(keycode, ev);
 		if (keycode == 58) { // right alt
 			this.toggleButton = true;
 			return false;
@@ -373,6 +1175,9 @@ public class PadActivity extends Activity {
 	}
 
 	public boolean onKeyUp(int keycode, KeyEvent ev) {
+		//allow menu to show
+		//if (keycode == KeyEvent.KEYCODE_MENU)
+		//	return super.onKeyDown(keycode, ev);
 		if (keycode == KeyEvent.KEYCODE_BACK) {
 			if (!this.softShown) {
 				Intent i = new Intent(this, RemoteDroid.class);
@@ -457,7 +1262,9 @@ public class PadActivity extends Activity {
 	}
 
 	// mouse events
-
+	boolean scrollTag = false;
+	int scrollCount = 0;
+	int rightClickAllowance = 1; //scroll iterations before skipping Right Click and doing scroll instead in two touch right click mode
 	private boolean onMouseMove(MotionEvent ev) {
 		int type = 0;
 		float xMove = 0f;
@@ -478,6 +1285,11 @@ public class PadActivity extends Activity {
 
 		switch (ev.getAction()) {
 		case MotionEvent.ACTION_DOWN:
+			changed = "a  ";
+			etAdvancedText.setText(changed);//reset text, so special keyboards wont try to insert a " " before next word (a bit of a hack, should be in a method, maybe cancelKeyboard()
+
+			// scrollX = 0;
+			scrollY = 0;
 			//
 			if (Settings.tapToClick && (pointerCount == 1)) {
 				if (this.tapState == TAP_NONE) {
@@ -512,14 +1324,28 @@ public class PadActivity extends Activity {
 				if (elapsed <= Settings.clickTime) {
 					if (this.tapState == TAP_NONE) {
 						// send the mouse down event
-						this.lastTap = now;
-						//
-						this.tapTimer = new Timer();
-						this.tapTimer.scheduleAtFixedRate(new TimerTask() {
-							public void run() {
-								firstTapUp();
-							}
-						}, 0, Settings.clickTime);
+						if(scrollTag && Settings.twoTouchRightClick && scrollCount <= rightClickAllowance) //make sure scrolling has not happened
+						{
+							this.lastTap = now;
+							//
+							this.tapTimer = new Timer();
+							this.tapTimer.scheduleAtFixedRate(new TimerTask() {
+								public void run() {
+									firstRightTapUp();
+								}
+							}, 0, Settings.clickTime);
+						}
+						else
+						{
+							this.lastTap = now;
+							//
+							this.tapTimer = new Timer();
+							this.tapTimer.scheduleAtFixedRate(new TimerTask() {
+								public void run() {
+									firstTapUp();
+								}
+							}, 0, Settings.clickTime);
+						}
 
 					} else if (this.tapState == TAP_SECOND) {
 						// double-click
@@ -546,6 +1372,9 @@ public class PadActivity extends Activity {
 			type = 1;
 			xMove = 0;
 			yMove = 0;
+			//scrollX= 0;
+			scrollY = 0;
+			scrollTag = false; //clear multi-touch event
 			break;
 		case MotionEvent.ACTION_MOVE:
 			if (pointerCount == 1) {
@@ -558,7 +1387,7 @@ public class PadActivity extends Activity {
 				this.xHistory = ev.getX();
 				this.yHistory = ev.getY();
 			} else if (pointerCount == 2) {
-				// multitouch scroll
+				// multi-touch scroll
 				type = -1;
 
 				int pointer0 = WrappedMotionEvent.getPointerId(ev, 0);
@@ -612,7 +1441,14 @@ public class PadActivity extends Activity {
 				
 				scrollY = 0f;
 			}
-			this.sendScrollEvent(dir);
+			if(scrollTag==true) scrollCount++;
+			else scrollCount = 0;
+			scrollTag = true; //flag multi touch state for next up event
+			if(Settings.twoTouchRightClick == true){ //if two finger right click is enabled we need to delay scrolling (1 iterations)
+				if(dir!=0 && scrollCount > rightClickAllowance) { this.sendScrollEvent(dir); }//lets only send scroll events if there is distance to scroll
+			} else {
+				if(dir!=0) this.sendScrollEvent(dir); //lets only send scroll events if there is distance to scroll
+			}
 		} else if (type == 2) {
 			// if type is 0 or 1, the server will not do anything with it, so we
 			// only send type 2 events
@@ -623,7 +1459,23 @@ public class PadActivity extends Activity {
 	}
 
 	//
-
+	
+	private void firstRightTapUp() {
+		this.leftToggle = false;
+		if (this.tapState == TAP_NONE) {
+			// single click
+			// counts as a tap
+			this.tapState = TAP_RIGHT;
+			this.rightButtonDown();
+		} else if (this.tapState == TAP_RIGHT) {
+			this.rightButtonUp();
+			this.tapState = TAP_NONE;
+			this.lastTap = 0;
+			this.tapTimer.cancel();
+			this.tapTimer = null;
+		}
+	}
+	
 	private void firstTapUp() {
 		this.leftToggle = false;
 		if (this.tapState == TAP_NONE) {
@@ -633,6 +1485,12 @@ public class PadActivity extends Activity {
 			this.leftButtonDown();
 		} else if (this.tapState == TAP_FIRST) {
 			this.leftButtonUp();
+			this.tapState = TAP_NONE;
+			this.lastTap = 0;
+			this.tapTimer.cancel();
+			this.tapTimer = null;
+		}else if (this.tapState == TAP_RIGHT) {
+			this.rightButtonUp();
 			this.tapState = TAP_NONE;
 			this.lastTap = 0;
 			this.tapTimer.cancel();
