@@ -17,7 +17,8 @@ public class LinuxInetAddress {
 		if(!localHost.isLoopbackAddress()) return localHost;
 		InetAddress[] addrs = getAllLocalUsingNetworkInterface();
 		for(int i=0; i<addrs.length; i++) {
-			if(!addrs[i].isLoopbackAddress()) return addrs[i];
+			//Check for "." to ensure IPv4
+			if(!addrs[i].isLoopbackAddress() && addrs[i].getHostAddress().contains(".")) return addrs[i];
 		}
 		return localHost;	
 	}

@@ -28,7 +28,7 @@ public class KeyTranslator {
 		try {
 			DocumentBuilder builder = factory.newDocumentBuilder();
 			if (AppFrame.jar == null) {
-				this.myDoc = builder.parse( new File(AppFrame.basePath+sPath) );
+				this.myDoc = builder.parse( new File((AppFrame.basePath+sPath).replace('\\', '/')) );//ensure seperator is '/' as linux is picky
 			} else {
 				this.myDoc = builder.parse(AppFrame.jar.getInputStream(AppFrame.jar.getJarEntry(sPath)));
 			}

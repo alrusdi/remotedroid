@@ -44,6 +44,9 @@ public class OSCWorld extends World {
 	private Label lbDebug;
 	//
 	private int scrollMod = -1;
+	//
+	private float xLeftover = 0; //for subpixel mouse accuracy
+	private float yLeftover = 0; //for subpixel mouse accuracy
 
 	public OSCWorld() {
 		super();
@@ -100,6 +103,10 @@ public class OSCWorld extends World {
 					if (args.length == 3) {
 						keyboardEvent(Integer.parseInt(args[0].toString()), Integer
 								.parseInt(args[1].toString()), args[2].toString());
+					}
+					if (args.length == 2) { //handle raw keyboard event, no translations
+						keyboardEvent(Integer.parseInt(args[0].toString()), Integer
+								.parseInt(args[1].toString()));
 					}
 				}
 			};
@@ -174,8 +181,16 @@ public class OSCWorld extends World {
 			PointerInfo info = MouseInfo.getPointerInfo();
 			if (info != null) {
 				java.awt.Point p = info.getLocation();
-				p.x += (int) (xOffset * sensitivity);
-				p.y += (int) (yOffset * sensitivity);
+				//for sub-pixel mouse accuracy, save leftover rounding value
+				float ox = (xOffset * sensitivity) + xLeftover;
+				float oy = (yOffset * sensitivity) + yLeftover;				
+				int ix = Math.round(ox);
+				int iy = Math.round(oy);
+				xLeftover = ox-ix;
+				yLeftover = oy-iy;
+				//
+				p.x += ix;
+				p.y += iy;
 				int l = this.gBounds.length;
 				for (int i = 0; i < l; ++i) {
 					if (this.gBounds[i].contains(p)) {
@@ -183,6 +198,11 @@ public class OSCWorld extends World {
 						break;
 					}
 				}
+				
+				try{
+					this.robot.mouseMove(p.x, p.y);//for systems with quirky bounds checking, allow mouse to move smoothly along to and left edges
+				}catch(Exception e){}
+				
 			}
 		}
 	}
@@ -211,6 +231,30 @@ public class OSCWorld extends World {
 		this.robot.mouseWheel(-dir * this.scrollMod);
 	}
 
+	//Raw keyboard event, no translation, intercepted when argument count is 2
+	private void keyboardEvent(int type, int keycode) {
+		switch (type) {
+		case 0:
+			// key down
+			if (this.translator.isShift(keycode)) {
+				this.shifted = true;
+				this.keyPress(KeyEvent.VK_SHIFT);
+			} else {
+				this.keyPress(keycode);
+			}
+			break;
+		case 1:
+			// key up
+			if (this.translator.isShift(keycode)) {
+				this.shifted = false;
+				keyRelease(KeyEvent.VK_SHIFT);
+			} else {
+				this.keyRelease(keycode);
+			}
+			break;
+		}		
+	}
+	
 	private void keyboardEvent(int type, int keycode, String value) {
 		//
 		KeyCodeData data;
