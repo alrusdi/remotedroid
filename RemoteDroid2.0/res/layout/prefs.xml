@@ -25,7 +25,7 @@
 
 			<TextView android:id="@+id/TextView06" android:layout_width="wrap_content"
 				android:layout_height="wrap_content" android:layout_gravity="left"
-				android:textColor="#FFF" android:text="Two-Finger Right Click"
+				android:textColor="#FFF" android:text="Two-Finger-Right-Click"
 				android:textSize="16dp"></TextView>
 			<CheckBox android:layout_width="wrap_content"
 				android:layout_height="wrap_content" android:text="Enabled"

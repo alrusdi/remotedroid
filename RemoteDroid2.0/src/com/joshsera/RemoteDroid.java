@@ -14,6 +14,7 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.Window;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageButton;
@@ -51,6 +52,8 @@ public class RemoteDroid extends Activity {
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 
+		requestWindowFeature(Window.FEATURE_NO_TITLE); // added to save screen space, the Title was shown twice, in Standard Android bar, then below in Bolder larger text, this gets rid of the standard android bar
+		
 		setContentView(R.layout.main);
 		// set some listeners
 		Button but = (Button)this.findViewById(R.id.btnConnect);
