@@ -1,20 +1,11 @@
 package com.joshsera;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
-
 import android.app.Activity;
 import android.content.Intent;
-import android.os.Bundle;
+import android.os.*;
 import android.util.Log;
-import android.view.Menu;
-import android.view.MenuItem;
-import android.view.View;
-import android.view.ViewGroup;
-import android.view.Window;
+import android.view.*;
+import android.widget.AdapterView;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageButton;
@@ -22,6 +13,7 @@ import android.widget.ListView;
 import android.widget.SimpleAdapter;
 import android.widget.TextView;
 import android.widget.Toast;
+import java.util.*;
 
 /*
  * To-do
@@ -41,7 +33,11 @@ public class RemoteDroid extends Activity {
 	private EditText tbIp;
 	//
 	private HelpDialog dlHelp;
-	private ListView mHostlist;
+	//
+	private DiscoverThread discover;
+	private Handler handler;
+	private SimpleAdapter adapter;
+	private Vector<String> hostlist;
 
 	public RemoteDroid() {
 		super();
@@ -51,10 +47,10 @@ public class RemoteDroid extends Activity {
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
-
 		requestWindowFeature(Window.FEATURE_NO_TITLE); // added to save screen space, the Title was shown twice, in Standard Android bar, then below in Bolder larger text, this gets rid of the standard android bar
-		
 		setContentView(R.layout.main);
+		//
+		this.handler = new Handler();
 		// set some listeners
 		Button but = (Button)this.findViewById(R.id.btnConnect);
 		but.setOnClickListener(new View.OnClickListener() {
@@ -66,9 +62,6 @@ public class RemoteDroid extends Activity {
 		// check SharedPreferences for IP
 		Settings.init(this.getApplicationContext());
 
-		mHostlist = (ListView) findViewById(R.id.lvHosts);
-		populateHostList();
-
 		//
 		this.tbIp = (EditText)this.findViewById(R.id.etIp);
 		if (Settings.ip != null) {
@@ -78,58 +71,18 @@ public class RemoteDroid extends Activity {
 		if (this.dlHelp == null) {
 			this.dlHelp = new HelpDialog(this);
 		}
-		// goes to onStart
+		// discover some servers
+		this.hostlist = new Vector<String>();
+		((ListView)this.findViewById(R.id.lvHosts)).setOnItemClickListener(new AdapterView.OnItemClickListener() {
+			public void onItemClick(AdapterView adapter, View v, int position, long id) {
+				onHostClick(position);
+			}
+		});
 	}
 
-	private void populateHostList() {
-		// populates the host list with saved hosts from the settings
-		LinkedList<String> ips = Settings.savedHosts;
-		String[] from = new String[]{"hostip"};
-		int[] to = new int[]{R.id.hostEntry};
-		List<Map<String,String>> data = new ArrayList<Map<String, String>>();
-		for (String s:ips){
-			Map<String, String> map = new HashMap<String, String>();
-			map.put("hostip", s);
-			data.add(map);
-		}
-
-		/**
-		 * in order to be able to hook up the onclick listeners for 
-		 * the children of the simple adapter, we have to override the 
-		 * getView() method to set the listeners we want, so callbacks
-		 * can function correctly
-		 */
-
-		SimpleAdapter adapter = new SimpleAdapter(this,data,R.layout.savedhost,from,to){
-			@Override
-			public View getView(int position, View convertView, ViewGroup parent){
-				View v = super.getView(position, convertView, parent);
-				TextView text = (TextView) v.findViewById(R.id.hostEntry);
-				final CharSequence str = text.getText();
-				ImageButton b = (ImageButton) v.findViewById(R.id.hostbutton);
-
-				// set the listener for clicking on the text
-				text.setOnClickListener(new View.OnClickListener() {
-
-					public void onClick(View v) {
-						onSavedHost(str); 
-					}
-				});
-
-				// set the listener for clicking on the delete button
-				b.setOnClickListener(new View.OnClickListener() {     				
-
-					public void onClick(View v) { 
-						onRemoveSavedHost(str);
-					}
-				});
-
-				return v;
-			}
-		};
-
-		mHostlist.setAdapter(adapter);
-
+	private void updateHostList() {
+		FoundHostsAdapter adapter = new FoundHostsAdapter(this.hostlist, this.getApplication());
+		((ListView)this.findViewById(R.id.lvHosts)).setAdapter(adapter);
 	}
 
 
@@ -151,12 +104,25 @@ public class RemoteDroid extends Activity {
 	/** App starts displaying things */
 	public void onResume() {
 		super.onResume();
+		this.discover = new DiscoverThread(new DiscoverThread.DiscoverListener() {
+			public void onAddressReceived(String address) {
+				hostlist.add(address);
+				Log.d(TAG, "Got host back, "+address);
+				handler.post(new Runnable() {
+					public void run() {
+						updateHostList();
+					}
+				});
+			}
+		});
+		this.discover.start();
 	}
 
 
 	/** App goes into background */
 	public void onPause() {
 		super.onPause();
+		this.discover.closeSocket();
 	}
 
 	// menu
@@ -209,30 +175,10 @@ public class RemoteDroid extends Activity {
 			Toast.makeText(this, this.getResources().getText(R.string.toast_invalidIP), Toast.LENGTH_LONG).show();
 		}
 	}
-
-
-	private void onRemoveSavedHost(CharSequence str) {
-		try {
-			Settings.removeSavedHost(str); 
-			populateHostList();
-			// TODO: we should be able to just call _below_ to update the view
-			// however, the DataSetObserver is locked onto a copy of the data,
-			// not a reference (from Settings). This needs to be changed...
-			//((SimpleAdapter)mHostlist.getAdapter()).notifyDataSetChanged();
-
-		} catch (Exception e) {
-			Log.d(TAG,"couldnt remove "+str.toString()+" from list: "+e.toString());
-		}
-
-	}
-
-	private void onSavedHost(CharSequence s) {
-		try {
-			tbIp.setText(s);
-		} catch (Exception e) {
-			Log.d(TAG,e.toString());
-		}
-
+	
+	private void onHostClick(int item) {
+		this.tbIp.setText(this.hostlist.get(item));
+		this.onConnectButton();
 	}
 
 	private void onHelp() {
@@ -243,5 +189,5 @@ public class RemoteDroid extends Activity {
 		Intent i = new Intent(RemoteDroid.this, PrefsActivity.class);
 		this.startActivity(i);
 	}
-
+	
 }
