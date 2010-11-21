@@ -47,6 +47,8 @@ public class OSCWorld extends World {
 	//
 	private float xLeftover = 0; //for subpixel mouse accuracy
 	private float yLeftover = 0; //for subpixel mouse accuracy
+	//
+	private DiscoverableThread discoverable;
 
 	public OSCWorld() {
 		super();
@@ -164,6 +166,9 @@ public class OSCWorld extends World {
 				// hack for robot class bug.
 				this.scrollMod = 1;
 			}
+			// discoverable stuff
+			this.discoverable = new DiscoverableThread(OSCPort.defaultSCOSCPort()+1);
+			this.discoverable.start();
 		} catch (Exception ex) {
 
 		}
@@ -262,7 +267,7 @@ public class OSCWorld extends World {
 		switch (type) {
 		case 0:
 			// key down
-
+			System.out.println("Key down, code:"+String.valueOf(keycode));
 			// check if it isn't a mouse click (trackpad "enter" = left button)
 			if (this.translator.isLeftClick(keycode)) {
 				buttonEvent(0, 0);
@@ -319,7 +324,7 @@ public class OSCWorld extends World {
 			break;
 		case 1:
 			// key up
-
+			System.out.println("Key up, code:"+String.valueOf(keycode));
 			// check if it isn't a mouse click (trackpad "enter" = left button)
 			if (this.translator.isLeftClick(keycode)) {
 				buttonEvent(1, 0);
