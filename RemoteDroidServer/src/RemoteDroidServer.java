@@ -51,8 +51,6 @@ public class RemoteDroidServer {
 				windowShown = false;
 			}
 		}
-		
-		windowShown = false;
 
 		f.setVisible(windowShown);
 
