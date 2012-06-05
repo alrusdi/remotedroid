@@ -7,6 +7,7 @@ import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
+import java.util.Scanner;
 
 import javax.swing.ImageIcon;
 
@@ -50,10 +51,10 @@ public class RemoteDroidServer {
 				windowShown = false;
 			}
 		}
+		
+		windowShown = false;
 
 		f.setVisible(windowShown);
-		
-		final TrayIcon trayIcon;
 
 		if (SystemTray.isSupported()) {
 			
@@ -81,6 +82,12 @@ public class RemoteDroidServer {
 		    } catch (AWTException e) {
 		    	e.printStackTrace();
 		    }
+		} else{
+			// Wait for an input, then quit.
+	    	while (true) {
+		    	final Scanner scanner = new Scanner(System.in);
+	    		if (scanner.next() != null) break;
+	    	}
 		}
 
 	}
