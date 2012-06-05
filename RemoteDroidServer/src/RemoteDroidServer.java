@@ -24,8 +24,9 @@ public class RemoteDroidServer {
 	
 	public static void main(String[] args) {
 		
+		System.out.println("RemoteDroid Server is running.");
+			
 		f = new AppFrame();
-		f.setVisible(true);
 		f.setResizable(false);
 		f.setTitle("RemoteDroid Server");
 		
@@ -40,13 +41,19 @@ public class RemoteDroidServer {
 	    		f.setVisible(false);
 	    	}
 	    });
-		/*
-		f = new Frame();
-		
-	    */
+
 		f.init();
-		//
-		System.out.println(System.getProperty("os.name"));
+		boolean windowShown = true;
+		
+		// Hide the GUI by default.
+		for(String arg : args){
+			if(arg.equals("--hidden")){
+				System.out.println("Interface is hidden. Use the tray icon (if available) to restore it.");
+				windowShown = false;
+			}
+		}
+
+		f.setVisible(windowShown);
 		
 		final TrayIcon trayIcon;
 
@@ -55,7 +62,7 @@ public class RemoteDroidServer {
 		    //SystemTray tray = SystemTray.getSystemTray();
 		    ImageIcon icon = new ImageIcon(RemoteDroidServer.class.getResource("icon.gif"));
 
-		    TrayIcon tray = new TrayIcon(icon.getImage().getScaledInstance(24, 24, Image.SCALE_DEFAULT), "My Caption");
+		    TrayIcon tray = new TrayIcon(icon.getImage().getScaledInstance(24, 24, Image.SCALE_DEFAULT), "Remotedroid Server");
 		    
 		    tray.addMouseListener(new MouseListener(){
 

@@ -18,57 +18,77 @@
 	code: Android keycode
 	modshift: Does this modified keycode need to be shifted? 0-no 1-yes.
 	modified: The local keycode entered when the modifier key is hit. If -1, no local key is hit.
+	shifted: If the local key needs to be shifted for this character.
 	localcode: equivalent keycode for this machine.
+	shiftedcode: Does this key need a different code if it's shifted? -1 if no, keycode if yes. ex. VK_2 on the
+	local machine is "@" when shifted, but in Android, pressing the soft keyboard "\"" key produces a shift press,
+	then a keycode 9 press.
 	
 	<key name="" code="" modshift="" modified="" localcode="" />
 	-->
-	<key name="trackbutton" code="23" modshift="0" modified="-1" localcode="157" />
-	<key name="q" code="45" modshift="0" modified="9" localcode="81" />
-	<key name="w" code="51" modshift="0" modified="222" localcode="87" />
-	<key name="e" code="33" modshift="1" modified="45" localcode="69" />
-	<key name="r" code="46" modshift="0" modified="-1" localcode="82" />
-	<key name="t" code="48" modshift="0" modified="-1" localcode="84" />
-	<key name="y" code="53" modshift="0" modified="-1" localcode="89" />
-	<key name="u" code="49" modshift="0" modified="-1" localcode="85" />
-	<key name="i" code="37" modshift="0" modified="45" localcode="73" />
-	<key name="o" code="43" modshift="1" modified="61" localcode="79" />
-	<key name="p" code="44" modshift="0" modified="61" localcode="80" />
-	<key name="a" code="29" modshift="0" modified="-1" localcode="65" />
-	<key name="s" code="47" modshift="1" modified="92" localcode="83" />
-	<key name="d" code="32" modshift="0" modified="92" localcode="68" />
-	<key name="f" code="34" modshift="1" modified="91" localcode="70" />
-	<key name="g" code="35" modshift="1" modified="93" localcode="71" />
-	<key name="h" code="36" modshift="1" modified="59" localcode="72" />
-	<key name="j" code="38" modshift="0" modified="59" localcode="74" />
-	<key name="k" code="39" modshift="1" modified="222" localcode="75" />
-	<key name="l" code="40" modshift="0" modified="222" localcode="76" />
-	<key name="delete" code="67" modshift="0" modified="127" localcode="8" />
-	<key name="z" code="54" modshift="0" modified="-1" localcode="90" />
-	<key name="x" code="52" modshift="0" modified="-1" localcode="88" />
-	<key name="c" code="31" modshift="0" modified="-1" localcode="67" />
-	<key name="v" code="50" modshift="0" modified="91" localcode="86" />
-	<key name="b" code="30" modshift="0" modified="93" localcode="66" />
-	<key name="n" code="42" modshift="1" modified="44" localcode="78" />
-	<key name="m" code="41" modshift="1" modified="46" localcode="77" />
-	<key name="," code="55" modshift="1" modified="47" localcode="44" />
-	<key name="enter" code="66" modshift="0" modified="-1" localcode="10" />
-	<key name="at" code="77" modshift="1" modified="192" localcode="17" />
-	<key name="space" code="62" modshift="0" modified="-1" localcode="32" />
-	<key name="." code="56" modshift="0" modified="47" localcode="46" />
+	<key name="q" code="45" modshift="0" modified="9" shifted="0" localcode="81" shiftedcode="-1" />
+	<key name="w" code="51" modshift="0" modified="222" shifted="0" localcode="87" shiftedcode="-1" />
+	<key name="e" code="33" modshift="1" modified="45" shifted="0" localcode="69" shiftedcode="-1" />
+	<key name="r" code="46" modshift="0" modified="-1" shifted="0" localcode="82" shiftedcode="-1" />
+	<key name="t" code="48" modshift="0" modified="-1" shifted="0" localcode="84" shiftedcode="-1" />
+	<key name="y" code="53" modshift="0" modified="-1" shifted="0" localcode="89" shiftedcode="-1" />
+	<key name="u" code="49" modshift="0" modified="-1" shifted="0" localcode="85" shiftedcode="-1" />
+	<key name="i" code="37" modshift="0" modified="45" shifted="0" localcode="73" shiftedcode="-1" />
+	<key name="o" code="43" modshift="1" modified="61" shifted="0" localcode="79" shiftedcode="-1" />
+	<key name="p" code="44" modshift="0" modified="61" shifted="0" localcode="80" shiftedcode="-1" />
+	<key name="a" code="29" modshift="0" modified="-1" shifted="0" localcode="65" shiftedcode="-1" />
+	<key name="s" code="47" modshift="1" modified="92" shifted="0" localcode="83" shiftedcode="-1" />
+	<key name="d" code="32" modshift="0" modified="92" shifted="0" localcode="68" shiftedcode="-1" />
+	<key name="f" code="34" modshift="1" modified="91" shifted="0" localcode="70" shiftedcode="-1" />
+	<key name="g" code="35" modshift="1" modified="93" shifted="0" localcode="71" shiftedcode="-1" />
+	<key name="h" code="36" modshift="1" modified="44" shifted="0" localcode="72" shiftedcode="-1" />
+	<key name="j" code="38" modshift="1" modified="46" shifted="0" localcode="74" shiftedcode="-1" />
+	<key name="k" code="39" modshift="1" modified="222" shifted="0" localcode="75" shiftedcode="-1" />
+	<key name="l" code="40" modshift="0" modified="222" shifted="0" localcode="76" shiftedcode="-1" />
+	<key name="delete" code="67" modshift="0" modified="127" shifted="0" localcode="8" shiftedcode="-1" />
+	<key name="z" code="54" modshift="0" modified="-1" shifted="0" localcode="90" shiftedcode="-1" />
+	<key name="x" code="52" modshift="0" modified="-1" shifted="0" localcode="88" shiftedcode="-1" />
+	<key name="c" code="31" modshift="0" modified="-1" shifted="0" localcode="67" shiftedcode="-1" />
+	<key name="v" code="50" modshift="0" modified="91" shifted="0" localcode="86" shiftedcode="-1" />
+	<key name="b" code="30" modshift="0" modified="93" shifted="0" localcode="66" shiftedcode="-1" />
+	<key name="n" code="42" modshift="1" modified="44" shifted="0" localcode="78" shiftedcode="-1" />
+	<key name="m" code="41" modshift="1" modified="46" shifted="0" localcode="77" shiftedcode="-1" />
+	<key name="," code="55" modshift="1" modified="47" shifted="0" localcode="44" shiftedcode="-1" />
+	<key name="enter" code="66" modshift="0" modified="-1" shifted="0" localcode="10" shiftedcode="-1" />
+	<key name="at" code="77" modshift="1" modified="192" shifted="1" localcode="50" shiftedcode="-1" />
+	<key name="space" code="62" modshift="0" modified="-1" shifted="0" localcode="32" shiftedcode="-1" />
+	<key name="." code="56" modshift="0" modified="47" shifted="0" localcode="46" shiftedcode="-1" />
+	<key name="esc" code="82" modshift="0" modified="-1" shifted="0" localcode="27" shiftedcode="-1" />
 	<!-- numbers -->
-	<key name="1" code="8" modshift="1" modified="49" localcode="49" />
-	<key name="2" code="9" modshift="1" modified="50" localcode="50" />
-	<key name="3" code="10" modshift="1" modified="51" localcode="51" />
-	<key name="4" code="11" modshift="1" modified="52" localcode="52" />
-	<key name="5" code="12" modshift="1" modified="53" localcode="53" />
-	<key name="6" code="13" modshift="1" modified="54" localcode="54" />
-	<key name="7" code="14" modshift="1" modified="55" localcode="55" />
-	<key name="8" code="15" modshift="1" modified="56" localcode="56" />
-	<key name="9" code="16" modshift="1" modified="57" localcode="57" />
-	<key name="0" code="7" modshift="1" modified="48" localcode="48" />
+	<key name="1" code="8" modshift="1" modified="49" shifted="0" localcode="49" shiftedcode="-1" />
+	<key name="2" code="9" modshift="1" modified="50" shifted="0" localcode="50" shiftedcode="222" />
+	<key name="3" code="10" modshift="1" modified="51" shifted="0" localcode="51" shiftedcode="-1" />
+	<key name="4" code="11" modshift="1" modified="52" shifted="0" localcode="52" shiftedcode="-1" />
+	<key name="5" code="12" modshift="1" modified="53" shifted="0" localcode="53" shiftedcode="-1" />
+	<key name="6" code="13" modshift="1" modified="54" shifted="0" localcode="54" shiftedcode="-1" />
+	<key name="7" code="14" modshift="1" modified="55" shifted="0" localcode="55" shiftedcode="-1" />
+	<key name="8" code="15" modshift="1" modified="56" shifted="0" localcode="56" shiftedcode="-1" />
+	<key name="9" code="16" modshift="1" modified="57" shifted="0" localcode="57" shiftedcode="-1" />
+	<key name="0" code="7" modshift="1" modified="48" shifted="0" localcode="48" shiftedcode="-1" />
+	<!-- misc symbols -->
+	<key name="#" code="18" modshift="1" modified="192" shifted="1" localcode="51" shiftedcode="-1" />
+	<key name="*" code="17" modshift="1" modified="192" shifted="1" localcode="56" shiftedcode="-1" />
+	<key name="-" code="69" modshift="1" modified="192" shifted="0" localcode="45" shiftedcode="-1" />
+	<key name="+" code="81" modshift="1" modified="192" shifted="1" localcode="521" shiftedcode="-1" />
+	<key name="single quote" code="75" modshift="1" modified="192" shifted="0" localcode="222" shiftedcode="-1" />
+	<key name=";" code="74" modshift="1" modified="192" shifted="0" localcode="59" shiftedcode="-1" />
+	<key name="slash" code="76" modshift="1" modified="192" shifted="0" localcode="47" shiftedcode="-1" />
+	<key name="back quote" code="68" modshift="1" modified="192" shifted="0" localcode="192" shiftedcode="-1" />
+	<key name="whack" code="73" modshift="1" modified="192" shifted="0" localcode="92" shiftedcode="-1" />
+	<key name="[" code="71" modshift="1" modified="192" shifted="0" localcode="91" shiftedcode="-1" />
+	<key name="]" code="72" modshift="1" modified="192" shifted="0" localcode="93" shiftedcode="-1" />
+	<key name="=" code="70" modshift="1" modified="192" shifted="0" localcode="61" shiftedcode="-1" />
+	<!-- special modifiers -->
+	<key name="search (acts as control)" code="84" modshift="1" modified="192" shifted="0" localcode="17" shiftedcode="-1" />
 	<!-- direction keys -->
-	<key name="trackup" code="19" modshift="0" modified="-1" localcode="38" />
-	<key name="trackdown" code="20" modshift="0" modified="-1" localcode="40" />
-	<key name="trackleft" code="21" modshift="0" modified="-1" localcode="37" />
-	<key name="trackright" code="22" modshift="0" modified="-1" localcode="39" />
+	<key name="trackup" code="19" modshift="0" modified="-1" shifted="0" localcode="38" shiftedcode="-1" />
+	<key name="trackdown" code="20" modshift="0" modified="-1" shifted="0" localcode="40" shiftedcode="-1" />
+	<key name="trackleft" code="21" modshift="0" modified="-1" shifted="0" localcode="37" shiftedcode="-1" />
+	<key name="trackright" code="22" modshift="0" modified="-1" shifted="0" localcode="39" shiftedcode="-1" />
+	<leftclick name="trackbutton" code="23"/>
 </config>
