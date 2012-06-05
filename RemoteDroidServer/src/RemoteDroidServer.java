@@ -8,10 +8,7 @@ import java.awt.event.MouseListener;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 
-import javax.swing.Icon;
 import javax.swing.ImageIcon;
-
-import com.sun.media.sound.Toolkit;
 
 /**
  * to-do:
@@ -23,15 +20,16 @@ public class RemoteDroidServer {
 	private static AppFrame f;
 	
 	public static void main(String[] args) {
-		
-		System.out.println("RemoteDroid Server is running.");
 			
 		f = new AppFrame();
+		
+		System.out.println(f.appName+" is running.");
 		f.setResizable(false);
-		f.setTitle("RemoteDroid Server");
+		f.setTitle(f.appName);
 		
 		f.addWindowListener(new WindowAdapter() {
 	    	public void windowClosing(WindowEvent e) {
+	    		System.out.println(f.appName+" is shutting down.");
 		        f.setVisible(false);
 		        f.dispose();
 		        System.exit(0);
@@ -62,7 +60,7 @@ public class RemoteDroidServer {
 		    //SystemTray tray = SystemTray.getSystemTray();
 		    ImageIcon icon = new ImageIcon(RemoteDroidServer.class.getResource("icon.gif"));
 
-		    TrayIcon tray = new TrayIcon(icon.getImage().getScaledInstance(24, 24, Image.SCALE_DEFAULT), "Remotedroid Server");
+		    TrayIcon tray = new TrayIcon(icon.getImage().getScaledInstance(24, 24, Image.SCALE_DEFAULT), f.appName);
 		    
 		    tray.addMouseListener(new MouseListener(){
 
