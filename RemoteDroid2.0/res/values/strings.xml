@@ -22,4 +22,6 @@
 
 <string name="txt_recentlyUsedHosts">Visible Hosts:</string>
 <string name="toast_invalidIP">Invalid IP address!</string>
+<string name="txt_advanced">Advanced</string>
+<string name="txt_keyboard">Keyboard</string>
 </resources>

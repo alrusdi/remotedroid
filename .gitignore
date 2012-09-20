@@ -1,0 +1,5 @@
+*.class
+*.cache
+gen/
+RemoteDroid2.0/bin/*
+RemoteDroid2.0/bin/
