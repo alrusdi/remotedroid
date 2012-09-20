@@ -1,5 +1,8 @@
 *.class
 *.cache
+*.iml
+.idea
 gen/
-RemoteDroid2.0/bin/*
-RemoteDroid2.0/bin/
+out/
+bin/*
+bin/
