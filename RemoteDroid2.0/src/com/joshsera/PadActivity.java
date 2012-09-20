@@ -567,8 +567,8 @@ public class PadActivity extends Activity {
 	public boolean onCreateOptionsMenu(Menu menu) {
 		super.onCreateOptionsMenu(menu);
 		//
-		menu.add(0, 1, 0, R.string.txt_advanced).setShortcut('0', 'c').setIcon(R.drawable.icon_advanced);
-		menu.add(0, 2, 0, R.string.txt_keyboard).setShortcut('1', 'k').setIcon(R.drawable.icon_keyboard);
+//		menu.add(0, 1, 0, R.string.txt_advanced).setShortcut('0', 'c').setIcon(R.drawable.icon_advanced);
+//		menu.add(0, 2, 0, R.string.txt_keyboard).setShortcut('1', 'k').setIcon(R.drawable.icon_keyboard);
 		menu.add(0, 3, 0, R.string.txt_help).setShortcut('2', 'h').setIcon(R.drawable.icon_help);
 		//
 		return true;
@@ -997,7 +997,6 @@ public class PadActivity extends Activity {
 		// listener
 		et.setOnKeyListener(new OnKeyListener(){
 
-				@Override
 				public boolean onKey(View v, int keyCode, KeyEvent event)
 				{
 					Log.d("KEY_CHANGED", "'" + event.getCharacters() + "' "
@@ -1075,7 +1074,7 @@ public class PadActivity extends Activity {
 	private void initLeftButton() {
 		FrameLayout fl = (FrameLayout) this.findViewById(R.id.flLeftButton);
 		android.view.ViewGroup.LayoutParams lp = fl.getLayoutParams();
-		if(!Settings.hideMouseButtons) lp.height=0;
+//		if(!Settings.hideMouseButtons) lp.height=0;
 		fl.setLayoutParams(lp);
 		// listener
 		fl.setOnTouchListener(new View.OnTouchListener() {
@@ -1089,7 +1088,7 @@ public class PadActivity extends Activity {
 	private void initRightButton() {
 		FrameLayout iv = (FrameLayout) this.findViewById(R.id.flRightButton);
 		android.view.ViewGroup.LayoutParams lp = iv.getLayoutParams();
-		if(!Settings.hideMouseButtons) lp.height=0;
+//		if(!Settings.hideMouseButtons) lp.height=0;
 		iv.setLayoutParams(lp);
 		// listener
 		iv.setOnTouchListener(new View.OnTouchListener() {
@@ -1103,7 +1102,7 @@ public class PadActivity extends Activity {
 	private void initMidButton() {
 		FrameLayout fl = (FrameLayout) this.findViewById(R.id.flKeyboardButton);
 		android.view.ViewGroup.LayoutParams lp = fl.getLayoutParams();
-		if(!Settings.hideMouseButtons) lp.height=0;
+//		if(!Settings.hideMouseButtons) lp.height=0;
 		fl.setLayoutParams(lp);
 		// listener
 		fl.setOnTouchListener(new View.OnTouchListener() {
@@ -1324,7 +1323,7 @@ public class PadActivity extends Activity {
 				if (elapsed <= Settings.clickTime) {
 					if (this.tapState == TAP_NONE) {
 						// send the mouse down event
-						if(scrollTag && Settings.twoTouchRightClick && scrollCount <= rightClickAllowance) //make sure scrolling has not happened
+						if(scrollTag /*&& Settings.twoTouchRightClick*/ && scrollCount <= rightClickAllowance) //make sure scrolling has not happened
 						{
 							this.lastTap = now;
 							//
@@ -1444,11 +1443,11 @@ public class PadActivity extends Activity {
 			if(scrollTag==true) scrollCount++;
 			else scrollCount = 0;
 			scrollTag = true; //flag multi touch state for next up event
-			if(Settings.twoTouchRightClick == true){ //if two finger right click is enabled we need to delay scrolling (1 iterations)
-				if(dir!=0 && scrollCount > rightClickAllowance) { this.sendScrollEvent(dir); }//lets only send scroll events if there is distance to scroll
-			} else {
+			//if(Settings.twoTouchRightClick == true){ //if two finger right click is enabled we need to delay scrolling (1 iterations)
+			//	if(dir!=0 && scrollCount > rightClickAllowance) { this.sendScrollEvent(dir); }//lets only send scroll events if there is distance to scroll
+			//} else {
 				if(dir!=0) this.sendScrollEvent(dir); //lets only send scroll events if there is distance to scroll
-			}
+			//}
 		} else if (type == 2) {
 			// if type is 0 or 1, the server will not do anything with it, so we
 			// only send type 2 events
