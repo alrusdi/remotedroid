@@ -7,11 +7,9 @@ import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
+import java.util.Scanner;
 
-import javax.swing.Icon;
 import javax.swing.ImageIcon;
-
-import com.sun.media.sound.Toolkit;
 
 /**
  * to-do:
@@ -23,14 +21,16 @@ public class RemoteDroidServer {
 	private static AppFrame f;
 	
 	public static void main(String[] args) {
-		
+			
 		f = new AppFrame();
-		f.setVisible(true);
+		
+		System.out.println(f.appName+" is running.");
 		f.setResizable(false);
-		f.setTitle("RemoteDroid Server");
+		f.setTitle(f.appName);
 		
 		f.addWindowListener(new WindowAdapter() {
 	    	public void windowClosing(WindowEvent e) {
+	    		System.out.println(f.appName+" is shutting down.");
 		        f.setVisible(false);
 		        f.dispose();
 		        System.exit(0);
@@ -40,22 +40,26 @@ public class RemoteDroidServer {
 	    		f.setVisible(false);
 	    	}
 	    });
-		/*
-		f = new Frame();
-		
-	    */
+
 		f.init();
-		//
-		System.out.println(System.getProperty("os.name"));
+		boolean windowShown = true;
 		
-		final TrayIcon trayIcon;
+		// Hide the GUI by default.
+		for(String arg : args){
+			if(arg.equals("--hidden")){
+				System.out.println("Interface is hidden. Use the tray icon (if available) to restore it.");
+				windowShown = false;
+			}
+		}
+
+		f.setVisible(windowShown);
 
 		if (SystemTray.isSupported()) {
 			
 		    //SystemTray tray = SystemTray.getSystemTray();
 		    ImageIcon icon = new ImageIcon(RemoteDroidServer.class.getResource("icon.gif"));
 
-		    TrayIcon tray = new TrayIcon(icon.getImage().getScaledInstance(24, 24, Image.SCALE_DEFAULT), "My Caption");
+		    TrayIcon tray = new TrayIcon(icon.getImage().getScaledInstance(24, 24, Image.SCALE_DEFAULT), f.appName);
 		    
 		    tray.addMouseListener(new MouseListener(){
 
@@ -76,6 +80,12 @@ public class RemoteDroidServer {
 		    } catch (AWTException e) {
 		    	e.printStackTrace();
 		    }
+		} else{
+			// Wait for an input, then quit.
+	    	while (true) {
+		    	final Scanner scanner = new Scanner(System.in);
+	    		if (scanner.next() != null) break;
+	    	}
 		}
 
 	}

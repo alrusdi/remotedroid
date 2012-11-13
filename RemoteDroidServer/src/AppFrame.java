@@ -33,7 +33,7 @@ public class AppFrame extends Frame {
 	//
 	private OSCWorld world;
 	//
-	private String appName = "RemoteDroid Server R2"; //added R2 so that version 2 of client will not confuse users as R2 is not needed for all features, and a future Client v3.0 might still use R2/v2.0 of the server
+	public String appName = "RemoteDroid Server R2"; //added R2 so that version 2 of client will not confuse users as R2 is not needed for all features, and a future Client v3.0 might still use R2/v2.0 of the server
 	//
 	private Toolkit toolkit;
 	private MediaTracker tracker;
